@@ -156,14 +156,14 @@ describe('effects', () => {
     const result = applyOne(original, () => [
       'korn+99',
       'vieh.kuh-9',
-      'rel.dege+99',
+      'rel.merten+99',
       'trust+2',
       'flag+met',
     ])
 
     expect(result.state.hof.korn).toBe(40)
     expect(result.state.hof.vieh.kuh).toBe(0)
-    expect(result.state.rel.dege).toBe(5)
+    expect(result.state.rel.merten).toBe(5)
     expect(result.state.trust).toBe(2)
     expect(result.state.flags.met).toBe(1)
     expect(original.hof.korn).toBe(3)

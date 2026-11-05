@@ -5,6 +5,7 @@ import {
   resolveCost,
 } from './content'
 import { chapterOneOpening } from './chapters/chapter1'
+import { chapterOneDayOneActions } from './chapters/chapterOneDayOne'
 import { createInitialState } from './state'
 import type {
   ActionContent,
@@ -90,5 +91,16 @@ describe('Chapter 1 opening content', () => {
     expect(resolveContentText(dynamicText, state)).toBe(
       'Andreas and his brothers reach the village.',
     )
+  })
+
+  it('offers distinct first-day work at locations unlocked in the opening', () => {
+    const actionIds = chapterOneDayOneActions.map((action) => action.id)
+    const locations = new Set(
+      chapterOneDayOneActions.map((action) => action.location),
+    )
+
+    expect(new Set(actionIds).size).toBe(actionIds.length)
+    expect(chapterOneDayOneActions.length).toBeGreaterThanOrEqual(3)
+    expect(locations.size).toBeGreaterThan(1)
   })
 })

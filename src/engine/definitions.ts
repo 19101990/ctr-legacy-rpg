@@ -54,8 +54,8 @@ export const ITEMS: Record<string, ItemDefinition> = {
 }
 
 export const NPC_NAMES: Record<string, string> = {
-  dege: 'Hans Degen',
-  hartman: 'Hanß Hartman',
+  merten: 'Claus Merten',
+  ehlers: 'Grete Ehlers',
   pastor: 'The pastor',
   carsten: 'Master Carsten',
   grape: 'Christoph Grape',
