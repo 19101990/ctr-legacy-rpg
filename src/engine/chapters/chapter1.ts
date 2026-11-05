@@ -1,6 +1,6 @@
 import type { SectionRegistry } from '../content'
 
-export const chapterOneOpening = {
+export const chapterOneOpening: SectionRegistry = {
   '1.00': {
     chapter: 1,
     source: 'inv',
@@ -40,4 +40,4 @@ He glances toward the tree line. Wolves have followed armies before, drawn by th
       },
     ],
   },
-} satisfies SectionRegistry
+}

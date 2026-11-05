@@ -1,38 +1,215 @@
 .game-shell {
+  width: min(100% - 2rem, 68rem);
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 4rem) 0;
 }
 
-.title-card {
-  width: min(100%, 42rem);
-  padding: clamp(2rem, 8vw, 5rem);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  text-align: center;
+.game-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1.25rem;
 }
 
 .eyebrow {
-  margin: 0 0 1rem;
+  margin: 0 0 0.65rem;
   color: var(--accent);
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.title-card h1 {
+.game-header h1,
+.story-card h2,
+.planning-card h2 {
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
   font-weight: 400;
-  line-height: 1.05;
 }
 
-.intro {
-  max-width: 28rem;
-  margin: 1.5rem auto 0;
+.game-header h1 {
+  font-size: clamp(2.5rem, 7vw, 4rem);
+  line-height: 1;
+}
+
+.day-marker,
+.plan-count {
+  margin: 0;
   color: var(--muted);
-  font-size: 1.125rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.story-card,
+.planning-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.story-card h2,
+.planning-card h2 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+.story-copy {
+  max-width: 54rem;
+  margin: 1.5rem 0 2rem;
+  line-height: 1.7;
+}
+
+.story-copy p {
+  margin: 0 0 1rem;
+}
+
+.section-label {
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.primary-button,
+.brother-tab,
+.action-card {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary-button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  padding: 0.8rem 1.15rem;
+}
+
+.primary-button:hover {
+  background: #204638;
+}
+
+.planning-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.planning-intro {
+  max-width: 42rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.brother-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.brother-tab {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: transparent;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+.brother-tab.selected,
+.action-card.selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.brother-tab small {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planning-card h3 {
+  margin: 0 0 0.8rem;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.action-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.7rem;
+}
+
+.action-card {
+  display: grid;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 1rem;
+  text-align: left;
+}
+
+.action-card:hover,
+.brother-tab:hover {
+  border-color: var(--accent);
+}
+
+.action-topline {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.action-name {
+  font-weight: 700;
+}
+
+.action-stat,
+.action-location,
+.action-selection {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.action-stat {
+  flex: 0 0 auto;
+}
+
+.action-description {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.action-selection {
+  justify-self: end;
+}
+
+button:focus-visible {
+  outline: 3px solid #ba7b28;
+  outline-offset: 3px;
+}
+
+@media (max-width: 38rem) {
+  .game-header,
+  .planning-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .brother-tabs {
+    grid-template-columns: 1fr;
+  }
 }
