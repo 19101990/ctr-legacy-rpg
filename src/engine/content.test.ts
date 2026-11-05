@@ -84,11 +84,11 @@ describe('Chapter 1 opening content', () => {
   it('resolves state-dependent content text against the provided game state', () => {
     const state = createInitialState()
     const dynamicText = (current: typeof state) =>
-      `${current.chars[current.lead].notes || 'The brothers'} reach Lochtum.`
+      `${current.chars[current.lead].notes || 'The brothers'} reach the village.`
 
     state.chars.andreas.notes = 'Andreas and his brothers'
     expect(resolveContentText(dynamicText, state)).toBe(
-      'Andreas and his brothers reach Lochtum.',
+      'Andreas and his brothers reach the village.',
     )
   })
 })
