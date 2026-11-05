@@ -1,0 +1,26 @@
+:root {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #1c2622;
+  background: #eceee6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --surface: #f7f8f2;
+  --line: #c6cdc1;
+  --accent: #2b5a4b;
+  --muted: #56645c;
+  --display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}

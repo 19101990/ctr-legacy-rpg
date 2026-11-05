@@ -1,0 +1,38 @@
+.game-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.title-card {
+  width: min(100%, 42rem);
+  padding: clamp(2rem, 8vw, 5rem);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title-card h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.intro {
+  max-width: 28rem;
+  margin: 1.5rem auto 0;
+  color: var(--muted);
+  font-size: 1.125rem;
+}
