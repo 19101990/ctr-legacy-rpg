@@ -6,6 +6,9 @@ import {
 } from './content'
 import { chapterOneOpening } from './chapters/chapter1'
 import { chapterOneDayOneActions } from './chapters/chapterOneDayOne'
+import { chapterOneActions } from './chapters/chapterOneActions'
+import { chapterOneScenes } from './chapters/chapterOneScenes'
+import { ITEMS, KEYWORDS } from './definitions'
 import { createInitialState } from './state'
 import type {
   ActionContent,
@@ -102,5 +105,33 @@ describe('Chapter 1 opening content', () => {
     expect(new Set(actionIds).size).toBe(actionIds.length)
     expect(chapterOneDayOneActions.length).toBeGreaterThanOrEqual(3)
     expect(locations.size).toBeGreaterThan(1)
+  })
+})
+
+describe('chapter one content references', () => {
+  const effects: string[] = []
+  const collect = (value: unknown) => {
+    if (typeof value === 'string') effects.push(value)
+    else if (Array.isArray(value)) value.forEach(collect)
+    else if (value && typeof value === 'object') Object.values(value).forEach(collect)
+  }
+  collect(chapterOneActions)
+  collect(chapterOneScenes)
+
+  it('only grants items and keywords that are defined', () => {
+    const missing = effects.flatMap((text) => {
+      const match = /^(?:all:)?(item|kw)[+-](\w+)$/.exec(text)
+      if (!match) return []
+      const table = match[1] === 'item' ? ITEMS : KEYWORDS
+      return match[2] in table ? [] : [text]
+    })
+    expect(missing).toEqual([])
+  })
+
+  it('gives every scene a readable title', () => {
+    const bad = Object.entries(chapterOneScenes)
+      .filter(([id, scene]) => !scene.title || scene.title === id)
+      .map(([id]) => id)
+    expect(bad).toEqual([])
   })
 })
