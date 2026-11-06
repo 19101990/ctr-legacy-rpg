@@ -74,7 +74,14 @@ export type Effect =
   | null
   | undefined
 
-export type GameMode = 'setup' | 'scene' | 'plan' | 'resolve' | 'evening' | 'phase'
+export type GameMode =
+  | 'setup'
+  | 'scene'
+  | 'plan'
+  | 'resolve'
+  | 'evening'
+  | 'phase'
+  | 'complete'
 
 export interface RolledCheck {
   a: number

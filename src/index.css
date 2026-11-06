@@ -1,5 +1,5 @@
 :root {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Newsreader', 'Iowan Old Style', Georgia, serif;
   color: #1c2622;
   background: #eceee6;
   font-synthesis: none;
@@ -12,7 +12,11 @@
   --accent: #2b5a4b;
   --muted: #56645c;
   --display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --body: 'Newsreader', 'Iowan Old Style', Georgia, serif;
   --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --ca: #2b5a4b;
+  --chh: #8a6d1f;
+  --cc: #9a3b2a;
 }
 
 * {
@@ -23,4 +27,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  font-family: var(--body);
+  font-size: 1.125rem;
+  line-height: 1.6;
 }

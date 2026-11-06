@@ -35,9 +35,8 @@ export interface GateContent extends CheckDefinition {
   min: number
   label?: string
   success: OutcomeContent
-  hard?: {
-    effects?: readonly Effect[]
-  }
+  great?: readonly Effect[]
+  hard?: OutcomeContent
 }
 
 export interface ChoiceContent {
