@@ -637,8 +637,9 @@ function ResolutionCard({
     result.act
       ? chapterOneActions.find((action) => action.id === result.act)?.name
       : result.sec
-        ? result.sec
-        : 'The day'
+        ? chapterOneScenes[result.sec]?.title
+        : undefined
+  const heading = description ?? 'The day'
 
   return (
     <section className="result-card" aria-live="polite">
@@ -652,7 +653,7 @@ function ResolutionCard({
         <span className={`monogram small-mono ${BROTHER_COLORS[brother]}`} aria-hidden="true">
           {BROTHER_NAMES[brother][0]}
         </span>{' '}
-        {description}
+        {heading}
       </h2>
       <p className="result-byline">
         {BROTHER_NAMES[brother]}
@@ -664,7 +665,7 @@ function ResolutionCard({
       {result.kind === 'check' && checkDefinition && pool ? (
         <div className="check">
           <div className="check-h">
-            <span>{checkDefinition.label ?? description}</span>
+            <span>{checkDefinition.label ?? heading}</span>
             <span className="hurdle">
               {'rival' in checkDefinition ? 'Contest' : `Target ${tgt(checkDefinition, state.ch)}`}
             </span>

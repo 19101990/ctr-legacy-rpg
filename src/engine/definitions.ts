@@ -53,6 +53,7 @@ export const ITEMS: Record<string, ItemDefinition> = {
   crook: { n: "Herder's crook (Hirtenstab)", d: 'A hazel crook you cut and bent yourself.', b: { herz: 1 } },
   coat: { n: 'Good coat (Rock)', d: 'A coat that makes people listen before you have said anything.', b: { herz: 1 } },
   whetstone: { n: 'Whetstone (Wetzstein)', d: 'A fine stone from the forge. Every blade is better for it.', b: { kraft: 1 } },
+  pistol: { n: 'Wheel-lock pistol (Radschlosspistole)', d: 'A rider’s pistol, rusty, with half a spring. It still frightens people.', b: { kraft: 1 } },
 }
 
 export const NPC_NAMES: Record<string, string> = {
