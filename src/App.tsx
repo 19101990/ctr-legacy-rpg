@@ -33,7 +33,7 @@ import {
   chapterOneEncounters,
   chapterOneScenes,
 } from './engine/chapters/chapterOneScenes'
-import { rivalBonus, tgt } from './engine/rules'
+import { gmin, rivalBonus, tgt } from './engine/rules'
 import { ATTRIBUTES, BROTHER_IDS } from './engine/types'
 import type {
   Attribute,
@@ -113,6 +113,17 @@ const RESOURCE_LABELS = [
   ['kasse', 'Groschen'],
   ['heim', 'House'],
   ['land', 'Morgen'],
+  ['ansehen', 'Standing'],
+  ['gunst', 'Favours'],
+] as const
+
+const INTRO_SECTION = '1.00'
+
+const STRIP_RESOURCES = [
+  ['korn', 'Stores'],
+  ['baustoff', 'Materials'],
+  ['kasse', 'Groschen'],
+  ['heim', 'House'],
   ['ansehen', 'Standing'],
   ['gunst', 'Favours'],
 ] as const
@@ -223,13 +234,10 @@ function App() {
 
   return (
     <main className="game-shell">
-      <header className="game-header">
-        <div>
-          <p className="eyebrow">A family chronicle · Autumn 1648</p>
-          <h1>Coming Home</h1>
-        </div>
-        <p className="day-marker">
-          Chapter 1 · Day {Math.min(game.day, CHAPTER_ONE_DAYS)} of {CHAPTER_ONE_DAYS} · Autumn 1648
+      <header className="mast">
+        <h1>Coming Home</h1>
+        <p className="tagline">
+          Three brothers, one farm. Chapter 1 · Day {Math.min(game.day, CHAPTER_ONE_DAYS)} of {CHAPTER_ONE_DAYS} · Autumn 1648
         </p>
       </header>
 
@@ -238,12 +246,12 @@ function App() {
         {([
           ['story', 'Story'],
           ['hof', 'The Hof'],
-          ['rules', 'Rules'],
           ...BROTHER_IDS.map((brother) => [brother, BROTHER_NAMES[brother]] as const),
+          ['rules', 'Rules'],
         ] as const).map(([tab, label]) => (
           <button
             aria-selected={activeTab === tab}
-            className={`app-tab${activeTab === tab ? ' active' : ''}${tab in BROTHER_COLORS ? ` ${BROTHER_COLORS[tab as BrotherId]}` : ''}`}
+            className={`app-tab${activeTab === tab ? ' active' : ''}${tab === 'rules' ? ' app-tab-end' : ''}${tab in BROTHER_COLORS ? ` ${BROTHER_COLORS[tab as BrotherId]}` : ''}`}
             key={tab}
             onClick={() => setActiveTab(tab)}
             role="tab"
@@ -254,6 +262,7 @@ function App() {
         ))}
       </nav>
 
+      <div className="game-layout">
       <div className="game-main">
         {activeTab === 'story' ? (
           <>
@@ -343,6 +352,10 @@ function App() {
           />
         ) : null}
       </div>
+      <aside className="game-sidebar" aria-label="The Hof">
+        <HofSidebar state={game} showBrothers={activeTab === 'hof'} />
+      </aside>
+      </div>
     </main>
   )
 }
@@ -363,9 +376,9 @@ function StoryCard({
   const visibleChoices = choices ?? []
   return (
     <article className="story-card">
-      <div className="story-meta">
-        <p className="section-label">Chapter {section.chapter}</p>
-        <span className={`source-tag source-${section.source}`}>
+      <div className="eyebrow">
+        <span>Chapter {section.chapter} · 1648</span>
+        <span className={`badge source-${section.source}`}>
           {section.source === 'inv'
             ? 'Invented'
             : section.source === 'mix'
@@ -380,28 +393,56 @@ function StoryCard({
       <StoryText text={text} />
       {state.chips.length > 0 ? <ChipList chips={state.chips} /> : null}
       {visibleChoices.length > 0 ? (
-        <div className="story-choices">
+        <div className="choices">
           {visibleChoices.map((choice, index) => {
-            const canAfford =
-              !choice.cost ||
-              canPay(
-                gameStateForChoice(state, choice),
-                resolveCost(choice.cost, gameStateForChoice(state, choice)),
-              )
+            const choiceState = gameStateForChoice(state, choice)
+            const cost = choice.cost ? resolveCost(choice.cost, choiceState) : null
+            const canAfford = !cost || canPay(choiceState, cost)
+            const costLabel = cost ? costText(cost) : ''
             return (
               <button
-                className="primary-button"
+                className={`choice${choice.as ? ` ${BROTHER_COLORS[choice.as]}` : ''}`}
                 key={`${choice.text}-${index}`}
                 disabled={!canAfford}
                 onClick={() => onChoose(index)}
               >
-                {choice.text}
+                <span className="choice-title">{choice.text}</span>
+                <ChoiceTags choice={choice} costLabel={costLabel} chapter={state.ch} />
               </button>
             )
           })}
         </div>
       ) : null}
     </article>
+  )
+}
+
+function ChoiceTags({
+  choice,
+  costLabel,
+  chapter,
+}: {
+  choice: NonNullable<SectionContent['choices']>[number]
+  costLabel: string
+  chapter: number
+}) {
+  const roll = choice.check ?? choice.contest
+  const gateMinimum = choice.gate ? gmin(choice.gate, chapter) : 0
+  const hasTags = Boolean(choice.as || roll || gateMinimum > 2 || costLabel)
+  if (!hasTags) return null
+  return (
+    <span className="cm">
+      {choice.as ? (
+        <span className={`ctag who ${BROTHER_COLORS[choice.as]}`}>{BROTHER_NAMES[choice.as]}</span>
+      ) : null}
+      {roll ? <span className="ctag risk">Risky: {ATTRIBUTE_LABELS[roll.attr]}</span> : null}
+      {choice.gate && gateMinimum > 2 ? (
+        <span className="ctag gate">
+          {ATTRIBUTE_LABELS[choice.gate.attr]} {gateMinimum}+ needed
+        </span>
+      ) : null}
+      {costLabel ? <span className="ctag cost">costs {costLabel}</span> : null}
+    </span>
   )
 }
 
@@ -446,6 +487,7 @@ function PlanningCard({
         stamina and results carry through the whole chapter.
       </p>
 
+      <h3 className="sub">Today’s plans</h3>
       <div className="brother-tabs" aria-label="Choose a brother">
         {BROTHER_IDS.map((brother) => (
           <button
@@ -454,20 +496,25 @@ function PlanningCard({
             key={brother}
             onClick={() => onSelectBrother(brother)}
           >
-            <span className="brother-tab-heading">
-              <strong>{BROTHER_NAMES[brother]}</strong>
-              <StaminaDots
-                current={state.chars[brother].stam}
-                max={state.chars[brother].stamMax}
-                label={`${BROTHER_NAMES[brother]} stamina`}
-              />
+            <span className="monogram" aria-hidden="true">
+              {BROTHER_NAMES[brother][0]}
             </span>
-            <small>
-              {state.plans[brother]
-                ? actionName(state.plans[brother]!)
-                : 'No plan chosen'}
-              {state.forced[brother] ? ' · must rest' : ''}
-            </small>
+            <span className="brother-tab-body">
+              <span className="brother-tab-heading">
+                <strong>{BROTHER_NAMES[brother]}</strong>
+                <StaminaDots
+                  current={state.chars[brother].stam}
+                  max={state.chars[brother].stamMax}
+                  label={`${BROTHER_NAMES[brother]} stamina`}
+                />
+              </span>
+              <small>
+                {state.plans[brother]
+                  ? actionName(state.plans[brother]!)
+                  : 'No plan chosen'}
+                {state.forced[brother] ? ' · must rest' : ''}
+              </small>
+            </span>
           </button>
         ))}
       </div>
@@ -512,11 +559,14 @@ function PlanningCard({
                     >
                       <span className="action-topline">
                         <span className="action-name">{action.name}</span>
-                        {action.check || action.contest || action.gate ? (
-                          <span className="action-stat">
-                            {ATTRIBUTE_LABELS[
-                              (action.check ?? action.contest ?? action.gate)!.attr
-                            ]}
+                        {action.check || action.contest ? (
+                          <span className="ctag risk">
+                            Risky: {ATTRIBUTE_LABELS[(action.check ?? action.contest)!.attr]}
+                          </span>
+                        ) : action.gate ? (
+                          <span className="ctag gate">
+                            {ATTRIBUTE_LABELS[action.gate.attr]}
+                            {gmin(action.gate, state.ch) > 2 ? ` ${gmin(action.gate, state.ch)}+` : ''}
                           </span>
                         ) : null}
                       </span>
@@ -546,7 +596,7 @@ function PlanningCard({
 
       <div className="plan-footer">
         <button
-          className="primary-button"
+          className="btn primary"
           disabled={assignedCount !== BROTHER_IDS.length}
           onClick={onBegin}
         >
@@ -592,10 +642,18 @@ function ResolutionCard({
 
   return (
     <section className="result-card" aria-live="polite">
-      <p className="section-label">
-        {pendingCheck ? 'A risky moment' : result.kind === 'gate' ? 'Work at the gate' : 'The day’s outcome'}
+      <p className="eyebrow">
+        <span>
+          {pendingCheck ? 'A risky moment' : result.kind === 'gate' ? 'Work at the gate' : 'The day’s outcome'}
+        </span>
+        <span>Day {state.day}</span>
       </p>
-      <h2>{description}</h2>
+      <h2>
+        <span className={`monogram small-mono ${BROTHER_COLORS[brother]}`} aria-hidden="true">
+          {BROTHER_NAMES[brother][0]}
+        </span>{' '}
+        {description}
+      </h2>
       <p className="result-byline">
         {BROTHER_NAMES[brother]}
         {result.kind === 'gate' && result.final.gate
@@ -604,43 +662,50 @@ function ResolutionCard({
       </p>
 
       {result.kind === 'check' && checkDefinition && pool ? (
-        <div className="check-panel">
-          <div className="check-summary">
-            <div>
-              <span className="check-label">Attribute</span>
-              <strong>{ATTRIBUTE_LABELS[checkDefinition.attr]} {pool.base}</strong>
-            </div>
-            <div>
-              <span className="check-label">Items</span>
-              <strong>{pool.ib > 0 ? `+${pool.ib}` : '—'}</strong>
-            </div>
-            <div>
-              <span className="check-label">Keywords</span>
-              <strong>{pool.helps.length > 0 ? `+${pool.helps.length}` : '—'}</strong>
-            </div>
-            <div>
-              <span className="check-label">Penalty</span>
-              <strong>{pool.pen > 0 ? `−${pool.pen}` : '—'}</strong>
-            </div>
+        <div className="check">
+          <div className="check-h">
+            <span>{checkDefinition.label ?? description}</span>
+            <span className="hurdle">
+              {'rival' in checkDefinition ? 'Contest' : `Target ${tgt(checkDefinition, state.ch)}`}
+            </span>
           </div>
-          <p className="check-equation">
-            Roll a d6 and add <strong>{pool.eff}</strong>
-            {' · '}
-            {checkChallenge(checkDefinition, state)}
+          <p className="sumline">
+            Roll <b>d6</b> and add <span className="num">{pool.eff}</span>
+            {' '}({ATTRIBUTE_LABELS[checkDefinition.attr]} {pool.base}
+            {pool.ib > 0 ? `, items +${pool.ib}` : ''}
+            {pool.helps.length > 0 ? `, traits +${pool.helps.length}` : ''}
+            {pool.pen > 0 ? `, penalty −${pool.pen}` : ''}).
           </p>
           {rolled ? (
-            <p className={`roll-result${rolled.ok ? ' success' : ' failure'}`}>
-              d6: {rolled.a} + {rolled.eff} = {rolled.total}
-              {rolled.rival !== null
-                ? ` · Rival: ${rolled.rival}`
-                : ` · Target: ${rolled.target}`}
-              {' · '}
-              {rolled.ok ? 'Success' : 'Failure'}
-              {rolled.shine ? ' · Shine! +1 XP' : ''}
-              {rolled.mishap ? ' · Mishap: −1 Stamina' : ''}
-              {result.kind === 'check' && result.rerolled ? ' · Rerolled' : ''}
-            </p>
-          ) : null}
+            <div className="rolled">
+              <div className="dice-row">
+                <span className="die best" aria-label={`Rolled ${rolled.a}`}>{rolled.a}</span>
+                <span className="rv">+ {rolled.eff} = <b>{rolled.total}</b></span>
+              </div>
+              <p className={`result ${rolled.ok ? 'ok' : 'bad'}`}>
+                {rolled.total}
+                {rolled.rival !== null
+                  ? ` against the rival’s ${rolled.rival}`
+                  : ` against ${rolled.target}`}
+                : <strong>{rolled.ok ? 'success' : 'failure'}</strong>
+                {rolled.shine ? ' · Shine! (natural 6, +1 XP)' : ''}
+                {rolled.mishap ? ' · Mishap (natural 1, −1 Stamina)' : ''}
+                {result.kind === 'check' && result.rerolled ? ' · rerolled' : ''}
+              </p>
+            </div>
+          ) : (
+            <div className="check-foot">
+              <span className="small">
+                d6 + {pool.eff} must {checkChallenge(checkDefinition, state)}
+                {'rival' in checkDefinition
+                  ? '. Ties go to the rival.'
+                  : `. Chance about ${checkChance(pool.eff, tgt(checkDefinition, state.ch))}%.`}
+              </span>
+              <button className="btn primary" onClick={onRoll}>
+                Roll the die
+              </button>
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -649,9 +714,9 @@ function ResolutionCard({
       ) : null}
 
       {final ? (
-        <>
+        <div className="outcome">
           {result.kind === 'gate' && result.final.gate ? (
-            <p className={`gate-status${result.final.gate.info.meets ? ' success' : ' hard'}`}>
+            <p className={`gateline${result.final.gate.info.meets ? '' : ' hard'}`}>
               {result.final.gate.info.meets
                 ? 'The work is within reach.'
                 : 'The work succeeds, but takes the hard way.'}
@@ -659,37 +724,28 @@ function ResolutionCard({
           ) : null}
           {final.text ? <StoryText text={interpolateBrotherName(final.text, brother)} /> : null}
           {final.chips.length > 0 ? <ChipList chips={final.chips} /> : null}
-        </>
-      ) : null}
-
-      <div className="result-actions">
-        {pendingCheck && !rolled ? (
-          <button className="primary-button" onClick={onRoll}>
-            Roll the die
-          </button>
-        ) : null}
-        {result.kind === 'check' && rolled && !final ? (
-          <>
-            <button className="secondary-button" onClick={onAccept}>
-              Accept result
-            </button>
-            {!rolled.ok && !result.rerolled ? (
-              <button
-                className="primary-button"
-                disabled={state.chars[brother].grit < 1}
-                onClick={onReroll}
-              >
-                Spend 1 Grit and reroll
-              </button>
-            ) : null}
-          </>
-        ) : null}
-        {final ? (
-          <button className="primary-button" onClick={onContinue}>
+          <button className="btn primary" onClick={onContinue}>
             Continue
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
+
+      {result.kind === 'check' && rolled && !final ? (
+        <div className="btn-row">
+          <button className="btn" onClick={onAccept}>
+            Accept result
+          </button>
+          {!rolled.ok && !result.rerolled ? (
+            <button
+              className="btn primary"
+              disabled={state.chars[brother].grit < 1}
+              onClick={onReroll}
+            >
+              Spend 1 Grit and reroll
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -705,13 +761,13 @@ function EveningCard({
 }) {
   return (
     <section className="story-card evening-card">
-      <p className="section-label">At dusk</p>
+      <p className="eyebrow"><span>At dusk</span></p>
       <h2>The household comes home</h2>
-      <div className="evening-lines">
-        {lines.map((line) => <p key={line}>{line}</p>)}
-      </div>
+      <ul className="evening-lines">
+        {lines.map((line) => <li key={line}>{line}</li>)}
+      </ul>
       {chips.length > 0 ? <ChipList chips={chips} /> : null}
-      <button className="primary-button" onClick={onContinue}>
+      <button className="btn primary" onClick={onContinue}>
         Continue
       </button>
     </section>
@@ -727,7 +783,7 @@ function CompletionCard({
 }) {
   return (
     <section className="story-card completion-card">
-      <p className="section-label">Chapter 1 complete</p>
+      <p className="eyebrow"><span>Chapter 1 complete</span></p>
       <h2>The first frost has come</h2>
       <StoryText
         text={`The family has made it through the first seven days back in Lochtum. The next winter is beyond this chapter’s playable story.`}
@@ -737,7 +793,7 @@ function CompletionCard({
         {state.hof.heim}, {state.hof.land} Morgen cleared, and Standing{' '}
         {state.hof.ansehen}.
       </p>
-      <button className="secondary-button" onClick={onRestart}>
+      <button className="btn" onClick={onRestart}>
         Begin again
       </button>
     </section>
@@ -753,27 +809,38 @@ function BrotherStatusStrip({
 }) {
   return (
     <section className="status-strip" aria-label="Household at a glance">
-      {BROTHER_IDS.map((brother) => {
-        const character = state.chars[brother]
-        return (
-          <button
-            className={`status-brother ${BROTHER_COLORS[brother]}`}
-            key={brother}
-            onClick={() => onSelect(brother)}
-            type="button"
-          >
-            <span className="status-name">{BROTHER_NAMES[brother]}</span>
-            <StaminaDots
-              current={character.stam}
-              max={character.stamMax}
-              label={`${BROTHER_NAMES[brother]}: ${character.stam} of ${character.stamMax} stamina`}
-            />
-            <span className="status-numbers">
-              {character.stam}/{character.stamMax} · {character.xp} XP
-            </span>
-          </button>
-        )
-      })}
+      <div className="status-brothers">
+        {BROTHER_IDS.map((brother) => {
+          const character = state.chars[brother]
+          return (
+            <button
+              className={`status-brother ${BROTHER_COLORS[brother]}`}
+              key={brother}
+              onClick={() => onSelect(brother)}
+              type="button"
+            >
+              <span className="status-name">{BROTHER_NAMES[brother]}</span>
+              <StaminaDots
+                current={character.stam}
+                max={character.stamMax}
+                label={`${BROTHER_NAMES[brother]}: ${character.stam} of ${character.stamMax} stamina`}
+              />
+              <span className="status-numbers">
+                {character.stam}/{character.stamMax} · {character.xp} XP
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      {/* On wide screens the sidebar carries these figures. */}
+      <div className="status-resources">
+        {STRIP_RESOURCES.map(([key, label]) => (
+          <div className="status-resource" key={key}>
+            <span className="lab">{label}</span>
+            <span className="val">{state.hof[key]}</span>
+          </div>
+        ))}
+      </div>
     </section>
   )
 }
@@ -800,23 +867,111 @@ function StaminaDots({
   )
 }
 
-function HofTab({ state }: { state: GameState }) {
-  const storedItems = state.hof.store
+function HofSidebar({
+  state,
+  showBrothers,
+}: {
+  state: GameState
+  showBrothers: boolean
+}) {
+  // The Hof tab already shows the household and the list in full.
+  if (showBrothers) return <BrotherStats state={state} />
   return (
     <>
       <HouseholdStatus state={state} />
-      <section className="sidebar-card list-card">
-        <p className="section-label">Seven days to frost</p>
-        <h2>Heinrich’s list</h2>
-        <ul className="goal-list">
-          {getHofGoals(state).map((goal) => (
-            <li className={goal.done ? 'complete' : ''} key={goal.title}>
-              <span aria-hidden="true">{goal.done ? '✓' : '○'}</span>
-              <span>{goal.title}<small>{goal.status}</small></span>
+      <HeinrichList state={state} />
+    </>
+  )
+}
+
+function BrotherStats({ state }: { state: GameState }) {
+  return (
+    <section className="sidebar-card">
+      <p className="section-label">The brothers</p>
+      <h2>At a glance</h2>
+      <div className="character-status">
+        {BROTHER_IDS.map((brother) => {
+          const character = state.chars[brother]
+          return (
+            <div className={`character-row ${BROTHER_COLORS[brother]}`} key={brother}>
+              <div className="character-heading">
+                <strong>{BROTHER_NAMES[brother]}</strong>
+                <span>
+                  <StaminaDots
+                    current={character.stam}
+                    max={character.stamMax}
+                    label={`${BROTHER_NAMES[brother]} stamina`}
+                  />
+                  {character.stam}/{character.stamMax}
+                </span>
+              </div>
+              <dl className="character-attributes">
+                {ATTRIBUTE_ORDER.map((attribute) => (
+                  <div key={attribute}>
+                    <dt>{ATTRIBUTE_LABELS[attribute]}</dt>
+                    <dd>{character.attrs[attribute]}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="character-detail">
+                Grit {character.grit} · XP {character.xp}
+              </div>
+              <div className="character-keywords">
+                {character.kw.length > 0
+                  ? character.kw.map((id) => KEYWORDS[id]?.n ?? id).join(', ')
+                  : 'No traits or conditions'}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function HofTab({ state }: { state: GameState }) {
+  const storedItems = state.hof.store
+  const places = LOCATION_ORDER.filter(
+    (location) => location !== 'home' && state.unlocked[location],
+  )
+  return (
+    <>
+      <HouseholdStatus cells state={state} />
+
+      <section className="sidebar-card">
+        <p className="section-label">What the family has built</p>
+        <h2>Improvements</h2>
+        <ul className="improvement-list cell-list">
+          {getImprovements(state).map((improvement) => (
+            <li className={improvement.done ? 'complete' : ''} key={improvement.title}>
+              <span aria-hidden="true">{improvement.done ? '✓' : '○'}</span>
+              <span>
+                <strong>{improvement.title}</strong>
+                <small>{improvement.status}</small>
+                <small>{improvement.done ? improvement.unlocks : improvement.hint}</small>
+              </span>
             </li>
           ))}
         </ul>
       </section>
+
+      <section className="sidebar-card">
+        <p className="section-label">Where the work can go</p>
+        <h2>Places opened</h2>
+        {places.length ? (
+          <ul className="inventory-list cell-list">
+            {places.map((location) => (
+              <li key={location}>
+                <strong>{LOCATIONS[location]?.name ?? location}</strong>
+                <span>{LOCATIONS[location]?.description}</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="empty-note">Only the hearth and the plot so far.</p>}
+      </section>
+
+      <HeinrichList state={state} />
+
       <section className="sidebar-card">
         <p className="section-label">The household chest</p>
         <h2>Stored items</h2>
@@ -838,6 +993,82 @@ function HofTab({ state }: { state: GameState }) {
   )
 }
 
+function HeinrichList({ state }: { state: GameState }) {
+  // Heinrich only draws up his list once the family is down from the Harz.
+  if (state.sec === INTRO_SECTION) return null
+  return (
+    <section className="sidebar-card list-card">
+      <p className="section-label">Seven days to frost</p>
+      <h2>Heinrich’s list</h2>
+      <ul className="goal-list">
+        {getHofGoals(state).map((goal) => (
+          <li className={goal.done ? 'complete' : ''} key={goal.title}>
+            <span aria-hidden="true">{goal.done ? '✓' : '○'}</span>
+            <span>{goal.title}<small>{goal.status}</small></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+const HOUSE_STEPS = [
+  'Ruin among the briars',
+  'Roofed shelter',
+  'Wattle-and-daub house',
+  'House with stall and threshing floor',
+]
+
+function getImprovements(state: GameState) {
+  const { hof, flags } = state
+  return [
+    {
+      title: 'The house',
+      done: hof.heim >= 1,
+      status: HOUSE_STEPS[hof.heim] ?? `Step ${hof.heim}`,
+      unlocks: hof.heim >= 3
+        ? 'The finest house this chapter allows: a warm night restores the most Stamina.'
+        : 'Brothers sleep dry. A fence and a further house step can now be built (3 Materials each step).',
+      hint: 'Raise a roof or dig an earth-hut on the plot. Without one the nights are cold.',
+    },
+    {
+      title: 'The animal pen',
+      done: Boolean(flags.pen),
+      status: flags.pen ? 'Built' : 'Not built',
+      unlocks: 'Protects the animals when the wolves come at dusk.',
+      hint: 'Build a pen of stakes and withies (1 Material).',
+    },
+    {
+      title: 'The stout fence',
+      done: Boolean(flags.fence),
+      status: flags.fence ? 'Built' : 'Not built',
+      unlocks: 'Wolves and thieves will think twice.',
+      hint: 'Needs a roof first, then 2 Materials.',
+    },
+    {
+      title: 'Steinborn Spring',
+      done: Boolean(flags.clean_spring),
+      status: flags.clean_spring ? 'Running clean' : 'Fouled with silt',
+      unlocks: 'The neighbours noticed: Standing rose by 1.',
+      hint: 'Trace the channel and clear it.',
+    },
+    {
+      title: 'The stone trough',
+      done: Boolean(flags.trough),
+      status: flags.trough ? 'Dug' : 'Not dug',
+      unlocks: 'The animals drink well below the spring.',
+      hint: 'Dig a trough below the spring.',
+    },
+    {
+      title: 'Cleared land',
+      done: hof.land >= 1,
+      status: `${hof.land} Morgen`,
+      unlocks: 'Ground ready for next year’s seed.',
+      hint: 'Clear a strip of the overgrown fields.',
+    },
+  ]
+}
+
 function BrotherSheet({
   brother,
   state,
@@ -857,9 +1088,12 @@ function BrotherSheet({
     <section className={`sheet-card ${BROTHER_COLORS[brother]}`}>
       <p className="section-label">{detail.arc} · character sheet</p>
       <div className="sheet-heading">
-        <div>
-          <h2>{BROTHER_NAMES[brother]}</h2>
-          <p className="sheet-role">{detail.role}</p>
+        <div className="sheet-title">
+          <span className="monogram" aria-hidden="true">{BROTHER_NAMES[brother][0]}</span>
+          <div>
+            <h2>{BROTHER_NAMES[brother]}</h2>
+            <p className="sheet-role">{detail.role}</p>
+          </div>
         </div>
         <div className="sheet-vitals">
           <StaminaDots current={character.stam} max={character.stamMax} label={`${character.stam} of ${character.stamMax} stamina`} />
@@ -1013,52 +1247,63 @@ function RulesTab() {
   )
 }
 
-function HouseholdStatus({ state }: { state: GameState }) {
+function HouseholdStatus({
+  state,
+  cells = false,
+}: {
+  state: GameState
+  cells?: boolean
+}) {
   return (
     <section className="sidebar-card">
       <p className="section-label">The Hof</p>
       <h2>Household</h2>
-      <dl className="resource-list">
+      <dl className={`resource-list${cells ? ' cells' : ''}`}>
         {RESOURCE_LABELS.map(([key, label]) => (
           <div key={key}>
-            <dt>{label}</dt>
+            <dt><ResourceIcon name={key} />{label}</dt>
             <dd>{state.hof[key]}</dd>
           </div>
         ))}
-        <div>
-          <dt>Animals</dt>
+        <div className="resource-wide">
+          <dt><ResourceIcon name="animals" />Animals</dt>
           <dd>
             {state.hof.vieh.kuh} cow · {state.hof.vieh.ziege} goats ·{' '}
             {state.hof.vieh.huhn} hens
           </dd>
         </div>
       </dl>
-      <div className="character-status">
-        {BROTHER_IDS.map((brother) => (
-          <div className={`character-row ${BROTHER_COLORS[brother]}`} key={brother}>
-            <div className="character-heading">
-              <strong>{BROTHER_NAMES[brother]}</strong>
-              <span>
-                <StaminaDots
-                  current={state.chars[brother].stam}
-                  max={state.chars[brother].stamMax}
-                  label={`${BROTHER_NAMES[brother]} stamina`}
-                />
-                {state.chars[brother].stam}/{state.chars[brother].stamMax}
-              </span>
-            </div>
-            <div className="character-detail">
-              Grit {state.chars[brother].grit} · XP {state.chars[brother].xp}
-            </div>
-            <div className="character-keywords">
-              {state.chars[brother].kw.length > 0
-                ? state.chars[brother].kw.join(', ')
-                : 'No conditions'}
-            </div>
-          </div>
-        ))}
-      </div>
     </section>
+  )
+}
+
+// Single-colour line drawings, so they take the ink colour of the page.
+const RESOURCE_ICONS: Record<string, string[]> = {
+  korn: ['M8.5 6.5C7 9 5 11 5 15a7 7 0 0 0 14 0c0-4-2-6-3.5-8.5', 'M8.5 6.5h7', 'M9 6.5 7.5 4l4.5 1.2L16.5 4 15 6.5'],
+  baustoff: ['M4 9.5a4 4 0 1 0 8 0 4 4 0 1 0-8 0', 'M12 9.5a4 4 0 1 0 8 0 4 4 0 1 0-8 0', 'M8 16.5a4 4 0 1 0 8 0 4 4 0 1 0-8 0'],
+  kasse: ['M4 12a8 8 0 1 0 16 0 8 8 0 1 0-16 0', 'M9 12h6', 'M12 9v6'],
+  heim: ['M3.5 11.5 12 5l8.5 6.5', 'M6 10.5V19h12v-8.5', 'M10 19v-5h4v5'],
+  land: ['M3 7.5c3-2 6 2 9 0s6-2 9 0', 'M3 12.5c3-2 6 2 9 0s6-2 9 0', 'M3 17.5c3-2 6 2 9 0s6-2 9 0'],
+  ansehen: ['M4 17.5 5 8l4 4 3-6 3 6 4-4 1 9.5z', 'M4 20.5h16'],
+  gunst: ['M2.5 12a5.5 5.5 0 1 0 11 0 5.5 5.5 0 1 0-11 0', 'M10.5 12a5.5 5.5 0 1 0 11 0 5.5 5.5 0 1 0-11 0'],
+  animals: ['M7 9c-2.5 0-4-1.5-4-3.5', 'M17 9c2.5 0 4-1.5 4-3.5', 'M7 9h10v5a5 5 0 0 1-10 0z', 'M10 14v1', 'M14 14v1'],
+}
+
+function ResourceIcon({ name }: { name: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="resource-icon"
+      fill="none"
+      focusable="false"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.5"
+      viewBox="0 0 24 24"
+    >
+      {(RESOURCE_ICONS[name] ?? []).map((d) => <path d={d} key={d} />)}
+    </svg>
   )
 }
 
@@ -1075,9 +1320,9 @@ function getHofGoals(state: GameState) {
       status: state.flags.pen ? 'Built' : 'Not built',
     },
     {
-      title: 'At least 3 Stores on the last night',
-      done: state.hof.korn >= 3,
-      status: `${state.hof.korn} of 3 Stores`,
+      title: 'At least 5 Stores on the last night',
+      done: state.hof.korn >= 5,
+      status: `${state.hof.korn} of 5 Stores`,
     },
     ...(state.flags.strangers_in
       ? [
@@ -1142,9 +1387,9 @@ function StoryText({ text }: { text: string }) {
 
 function ChipList({ chips }: { chips: Chip[] }) {
   return (
-    <div className="chip-list" aria-label="Changes">
+    <div className="chips" aria-label="Changes">
       {chips.map((chip, index) => (
-        <span className={`chip chip-${chip.k}`} key={`${chip.t}-${index}`}>
+        <span className={`chip ${chip.k}`} key={`${chip.t}-${index}`}>
           {chip.t}
         </span>
       ))}
@@ -1152,11 +1397,30 @@ function ChipList({ chips }: { chips: Chip[] }) {
   )
 }
 
+const COST_LABELS: Record<keyof Cost, string> = {
+  korn: 'Stores',
+  kasse: 'Groschen',
+  baustoff: 'Materials',
+  gunst: 'Favours',
+}
+
+function costText(cost: Cost): string {
+  return (Object.entries(cost) as [keyof Cost, number][])
+    .filter(([, amount]) => amount > 0)
+    .map(([key, amount]) => `${amount} ${COST_LABELS[key]}`)
+    .join(', ')
+}
+
 function canPay(state: GameState, cost: Cost): boolean {
   return Object.entries(cost).every(([key, amount]) => {
     const resource = key as 'korn' | 'kasse' | 'baustoff' | 'gunst'
     return state.hof[resource] >= (amount ?? 0)
   })
+}
+
+function checkChance(modifier: number, target: number): number {
+  const wins = [1, 2, 3, 4, 5, 6].filter((die) => die + modifier >= target).length
+  return Math.round((wins / 6) * 100)
 }
 
 function checkChallenge(

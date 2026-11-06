@@ -73,8 +73,8 @@ export const CHAPTER_ONE_ROAD_MILESTONES: Record<
     { title: 'A roof over the family', reached: (state) => state.hof.heim >= 1 },
     { title: 'A field cleared (2 Morgen)', reached: (state) => state.hof.land >= 2 },
     {
-      title: 'Stores for a winter (3 or more)',
-      reached: (state) => state.hof.korn >= 3,
+      title: 'Stores for a winter (5 or more)',
+      reached: (state) => state.hof.korn >= 5,
     },
   ],
   henning: [

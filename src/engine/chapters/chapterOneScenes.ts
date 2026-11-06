@@ -20,9 +20,9 @@ const chapterOneList = (state: GameState): string => {
       status: state.flags.pen ? 'built' : 'not built',
     },
     {
-      title: 'Stores in the sacks on the last night (3 or more)',
-      done: state.hof.korn >= 3,
-      status: `${state.hof.korn} of 3`,
+      title: 'Stores in the sacks on the last night (5 or more)',
+      done: state.hof.korn >= 5,
+      status: `${state.hof.korn} of 5`,
     },
     ...(state.flags.strangers_in
       ? [
