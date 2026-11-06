@@ -80,7 +80,7 @@ describe('Chapter 1 day flow', () => {
     const planned = {
       ...initial,
       mode: 'plan' as const,
-      hof: { ...initial.hof, heim: 1, land: 2, korn: 4 },
+      hof: { ...initial.hof, heim: 1, land: 2, korn: 6 },
       flags: { ...initial.flags, pen: true, favour_kuhlmann: true },
       rel: { ...initial.rel, kuhlmann: 1, pastor: 1 },
       trust: 2,

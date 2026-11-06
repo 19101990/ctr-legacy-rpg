@@ -1,33 +1,61 @@
 :root {
-  font-family: 'Newsreader', 'Iowan Old Style', Georgia, serif;
-  color: #1c2622;
-  background: #eceee6;
+  --bg: #eceee6;
+  --surface: #f7f8f2;
+  --ink: #1c2622;
+  --muted: #56645c;
+  --line: #c6cdc1;
+  --accent: #2b5a4b;
+  --accent-ink: #f4f7f1;
+  --bad: #9a3b2a;
+  --good: #2b5a4b;
+  --key: #6b5a1f;
+  --tint-good: #dce8df;
+  --tint-bad: #f0ddd6;
+  --tint-key: #eee6c8;
+  --ca: #2b5a4b;
+  --chh: #8a6d1f;
+  --cc: #9a3b2a;
+  --display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --body: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  font-family: var(--body);
+  color: var(--ink);
+  background: var(--bg);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  --surface: #f7f8f2;
-  --line: #c6cdc1;
-  --accent: #2b5a4b;
-  --muted: #56645c;
-  --display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
-  --body: 'Newsreader', 'Iowan Old Style', Georgia, serif;
-  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
-  --ca: #2b5a4b;
-  --chh: #8a6d1f;
-  --cc: #9a3b2a;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
-  margin: 0;
   font-family: var(--body);
   font-size: 1.125rem;
   line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+@media (max-width: 520px) {
+  body {
+    font-size: 1.05rem;
+  }
 }
