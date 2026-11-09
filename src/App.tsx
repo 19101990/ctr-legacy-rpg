@@ -12,8 +12,6 @@ import {
   acceptPendingCheck,
   beginPlannedDay,
   canPlanAction,
-  CHAPTER_ONE_DAYS,
-  CHAPTER_ONE_HEADINGS,
   CHAPTER_ONE_ROAD_MILESTONES,
   chooseStoryChoice,
   continueEvening,
@@ -26,13 +24,16 @@ import {
   rollPendingCheck,
   setPlan,
   startChapterOne,
+  startNextChapter,
   checkPool,
 } from './engine/chapterOneFlow'
-import { chapterOneActions } from './engine/chapters/chapterOneActions'
 import {
-  chapterOneEncounters,
-  chapterOneScenes,
-} from './engine/chapters/chapterOneScenes'
+  actions as allActions,
+  encounters as allEncounters,
+  getChapter,
+  getNextChapter,
+  scenes as allScenes,
+} from './engine/chapters'
 import { gmin, rivalBonus, tgt } from './engine/rules'
 import { ATTRIBUTES, BROTHER_IDS } from './engine/types'
 import type {
@@ -130,13 +131,14 @@ const STRIP_RESOURCES = [
 
 function App() {
   const [game, setGame] = useState<GameState>(() =>
-    startChapterOne(chapterOneScenes),
+    startChapterOne(allScenes),
   )
   const [selectedBrother, setSelectedBrother] =
     useState<BrotherId>('andreas')
   const [activeTab, setActiveTab] = useState<AppTab>('story')
 
-  const section = game.sec ? chapterOneScenes[game.sec] : undefined
+  const chapter = getChapter(game.ch)
+  const section = game.sec ? allScenes[game.sec] : undefined
   const sectionText = section ? resolveContentText(section.text, game) : ''
   const choices =
     section && game.mode === 'scene'
@@ -146,18 +148,18 @@ function App() {
   const availableActions = getAvailableActions(
     game,
     selectedBrother,
-    chapterOneActions,
+    allActions,
   )
   const checkDefinition = currentCheckDefinition(
     game,
-    chapterOneScenes,
-    chapterOneActions,
+    allScenes,
+    allActions,
   )
   const pool = checkDefinition ? checkPool(game, checkDefinition) : null
   const result = game.res
 
   function chooseAction(actionId: string) {
-    setGame(setPlan(game, selectedBrother, actionId, chapterOneActions))
+    setGame(setPlan(game, selectedBrother, actionId, allActions))
   }
 
   function chooseStory(index: number) {
@@ -167,29 +169,29 @@ function App() {
         game,
         game.sec,
         index,
-        chapterOneScenes,
-        chapterOneActions,
+        allScenes,
+        allActions,
       ),
     )
   }
 
   function startDay() {
-    setGame(beginPlannedDay(game, chapterOneActions))
+    setGame(beginPlannedDay(game, allActions))
   }
 
   function continueStoryResult() {
     setGame(
       continueResult(
         game,
-        chapterOneActions,
-        chapterOneScenes,
-        chapterOneEncounters,
+        allActions,
+        allScenes,
+        allEncounters,
       ),
     )
   }
 
   function continueNight() {
-    setGame(continueEvening(game, chapterOneScenes))
+    setGame(continueEvening(game, allScenes))
   }
 
   function spendExperience(
@@ -237,7 +239,7 @@ function App() {
       <header className="mast">
         <h1>Coming Home</h1>
         <p className="tagline">
-          Three brothers, one farm. Chapter 1 · Day {Math.min(game.day, CHAPTER_ONE_DAYS)} of {CHAPTER_ONE_DAYS} · Autumn 1648
+          Three brothers, one farm. Chapter {game.ch} · Day {Math.min(game.day, chapter.days)} of {chapter.days} · {chapter.year}
         </p>
       </header>
 
@@ -298,8 +300,8 @@ function App() {
                 setGame(
                   rollPendingCheck(
                     game,
-                    chapterOneScenes,
-                    chapterOneActions,
+                    allScenes,
+                    allActions,
                   ),
                 )
               }
@@ -307,8 +309,8 @@ function App() {
                 setGame(
                   acceptPendingCheck(
                     game,
-                    chapterOneScenes,
-                    chapterOneActions,
+                    allScenes,
+                    allActions,
                   ),
                 )
               }
@@ -316,8 +318,8 @@ function App() {
                 setGame(
                   rerollPendingCheck(
                     game,
-                    chapterOneScenes,
-                    chapterOneActions,
+                    allScenes,
+                    allActions,
                   ),
                 )
               }
@@ -334,7 +336,11 @@ function App() {
           ) : null}
 
           {game.mode === 'complete' ? (
-            <CompletionCard state={game} onRestart={() => setGame(startChapterOne(chapterOneScenes))} />
+            <CompletionCard
+              state={game}
+              onNextChapter={() => setGame(startNextChapter(game, allScenes))}
+              onRestart={() => setGame(startChapterOne(allScenes))}
+            />
           ) : null}
 
           {game.mode === 'plan' ? (
@@ -388,7 +394,7 @@ function StoryCard({
       </div>
       <h2>{section.title}</h2>
       {section.title === 'Day 1' && state.day === 1 ? (
-        <p className="day-heading">{CHAPTER_ONE_HEADINGS[state.day]}</p>
+        <p className="day-heading">{getChapter(state.ch).headings[state.day]}</p>
       ) : null}
       <StoryText text={text} />
       {state.chips.length > 0 ? <ChipList chips={state.chips} /> : null}
@@ -474,14 +480,14 @@ function PlanningCard({
     <section className="planning-card" aria-labelledby="planning-title">
       <div className="planning-heading">
         <div>
-          <p className="section-label">Day {state.day} of {CHAPTER_ONE_DAYS}</p>
+          <p className="section-label">Day {state.day} of {getChapter(state.ch).days}</p>
           <h2 id="planning-title">Set the household to work</h2>
         </div>
         <p className="plan-count" aria-live="polite">
           {assignedCount} of 3 plans chosen
         </p>
       </div>
-      <p className="day-heading">{CHAPTER_ONE_HEADINGS[state.day]}</p>
+      <p className="day-heading">{getChapter(state.ch).headings[state.day]}</p>
       <p className="planning-intro">
         Choose one task for each brother. Work happens in brother order; costs,
         stamina and results carry through the whole chapter.
@@ -547,7 +553,7 @@ function PlanningCard({
                       state,
                       selectedBrother,
                       action,
-                      chapterOneActions,
+                      allActions,
                     )
                   return (
                     <button
@@ -635,9 +641,9 @@ function ResolutionCard({
   const pendingCheck = result.kind === 'check' && !final
   const description =
     result.act
-      ? chapterOneActions.find((action) => action.id === result.act)?.name
+      ? allActions.find((action) => action.id === result.act)?.name
       : result.sec
-        ? chapterOneScenes[result.sec]?.title
+        ? allScenes[result.sec]?.title
         : undefined
   const heading = description ?? 'The day'
 
@@ -777,23 +783,30 @@ function EveningCard({
 
 function CompletionCard({
   state,
+  onNextChapter,
   onRestart,
 }: {
   state: GameState
+  onNextChapter: () => void
   onRestart: () => void
 }) {
+  const chapter = getChapter(state.ch)
+  const next = getNextChapter(state.ch)
   return (
     <section className="story-card completion-card">
-      <p className="eyebrow"><span>Chapter 1 complete</span></p>
-      <h2>The first frost has come</h2>
-      <StoryText
-        text={`The family has made it through the first seven days back in Lochtum. The next winter is beyond this chapter’s playable story.`}
-      />
+      <p className="eyebrow"><span>Chapter {state.ch} complete</span></p>
+      <h2>{chapter.ending.title}</h2>
+      <StoryText text={chapter.ending.text} />
       <p>
         The household ends with {state.hof.korn} Stores, a House at step{' '}
         {state.hof.heim}, {state.hof.land} Morgen cleared, and Standing{' '}
         {state.hof.ansehen}.
       </p>
+      {next ? (
+        <button className="btn primary" onClick={onNextChapter}>
+          On to Chapter {next.chapter}: {next.title}
+        </button>
+      ) : null}
       <button className="btn" onClick={onRestart}>
         Begin again
       </button>
@@ -997,15 +1010,20 @@ function HofTab({ state }: { state: GameState }) {
 function HeinrichList({ state }: { state: GameState }) {
   // Heinrich only draws up his list once the family is down from the Harz.
   if (state.sec === INTRO_SECTION) return null
+  const chapter = getChapter(state.ch)
   return (
     <section className="sidebar-card list-card">
-      <p className="section-label">Seven days to frost</p>
+      <p className="section-label">{chapter.goalsLabel}</p>
       <h2>Heinrich’s list</h2>
       <ul className="goal-list">
-        {getHofGoals(state).map((goal) => (
+        {chapter.goals(state).map((goal) => (
           <li className={goal.done ? 'complete' : ''} key={goal.title}>
             <span aria-hidden="true">{goal.done ? '✓' : '○'}</span>
-            <span>{goal.title}<small>{goal.status}</small></span>
+            <span>
+              {goal.title}
+              {goal.status ? <small>{goal.status}</small> : null}
+              {goal.stake && !goal.done ? <small>{goal.stake}</small> : null}
+            </span>
           </li>
         ))}
       </ul>
@@ -1226,7 +1244,7 @@ function RulesTab() {
     <section className="rules-card">
       <p className="section-label">The household’s rules</p>
       <h2>How to play</h2>
-      <p>Chapter 1 lasts seven days. Each day, choose one task for each brother; plans resolve in Andreas, Henning, Casper order.</p>
+      <p>Each chapter lasts a set number of days (seven in Chapter 1, six in Chapter 2). Each day, choose one task for each brother; plans resolve in Andreas, Henning, Casper order.</p>
       <h3>Work and checks</h3>
       <ul>
         <li><strong>Ordinary work:</strong> the action’s description shows its costs and likely results. Physical effort may cost Stamina.</li>
@@ -1243,7 +1261,7 @@ function RulesTab() {
         <li>Spend XP on a brother’s sheet: an attribute increase costs its current score +2; maximum Stamina costs 5 XP; Grit costs 4 XP.</li>
       </ul>
       <h3>Chapter goals</h3>
-      <p>Heinrich’s list tracks the roof, animal pen, winter Stores, cleared land and spring, a neighbor’s favour, and the household’s Standing. The first frost closes Chapter 1; later years are outside this playable chapter.</p>
+      <p>Heinrich’s list names what the household has to carry through the chapter. In Chapter 1 that is the roof, the pen, Stores, land, the spring, a neighbour’s favour and Standing. In Chapter 2 it is Stores to the thaw, the cow, and how you answer the people who knock. The last day of a chapter closes the list and lets you move on.</p>
     </section>
   )
 }
@@ -1306,56 +1324,6 @@ function ResourceIcon({ name }: { name: string }) {
       {(RESOURCE_ICONS[name] ?? []).map((d) => <path d={d} key={d} />)}
     </svg>
   )
-}
-
-function getHofGoals(state: GameState) {
-  const list = [
-    {
-      title: 'A roof over the family',
-      done: state.hof.heim >= 1,
-      status: `House ${state.hof.heim} of 1`,
-    },
-    {
-      title: 'A pen before the wolves',
-      done: Boolean(state.flags.pen),
-      status: state.flags.pen ? 'Built' : 'Not built',
-    },
-    {
-      title: 'At least 5 Stores on the last night',
-      done: state.hof.korn >= 5,
-      status: `${state.hof.korn} of 5 Stores`,
-    },
-    ...(state.flags.strangers_in
-      ? [
-          {
-            title: 'Keep Meta’s family safe (a roof, 2 Stores)',
-            done: state.hof.heim >= 1 && state.hof.korn >= 2,
-            status: `House ${state.hof.heim}; ${state.hof.korn} Stores`,
-          },
-        ]
-      : []),
-    {
-      title: 'Clear a Morgen for seed',
-      done: state.hof.land >= 1,
-      status: `${state.hof.land} Morgen`,
-    },
-    {
-      title: 'Clear the spring',
-      done: Boolean(state.flags.clean_spring),
-      status: state.flags.clean_spring ? 'Clear' : 'Fouled',
-    },
-    {
-      title: 'Earn a neighbour’s favour',
-      done: (state.rel.kuhlmann ?? 0) >= 2 || (state.rel.bode ?? 0) >= 2,
-      status: `Kuhlmann ${state.rel.kuhlmann ?? 0}; Bode ${state.rel.bode ?? 0}`,
-    },
-    {
-      title: 'Reach Standing 2',
-      done: state.hof.ansehen >= 2,
-      status: `Standing ${state.hof.ansehen}`,
-    },
-  ]
-  return list
 }
 
 function HouseholdList({ state }: { state: GameState }) {
@@ -1445,7 +1413,7 @@ function gameStateForChoice(
 }
 
 function actionName(actionId: string): string {
-  return chapterOneActions.find((action) => action.id === actionId)?.name ?? actionId
+  return allActions.find((action) => action.id === actionId)?.name ?? actionId
 }
 
 export default App
