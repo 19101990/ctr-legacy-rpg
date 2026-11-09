@@ -349,6 +349,7 @@ The boy does not say anything about the night of the fire. He does not have to.`
             effects: ['stam-2', 'rel.pastor+2', 'gunst+1', 'flag+fever_survived', 'flag-cough_lingers'],
             go: '@plan',
           },
+          hard: { effects: ['stam-1'] },
         },
       },
       {
@@ -364,6 +365,7 @@ The boy does not say anything about the night of the fire. He does not have to.`
             effects: ['stam-2', 'xp+1', 'flag+fever_survived', 'flag-cough_lingers'],
             go: '@plan',
           },
+          hard: { effects: ['stam-2'] },
         },
       },
       {

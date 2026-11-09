@@ -19,11 +19,7 @@ import {
 } from './resolution'
 import { poolFor, test } from './rules'
 import { createInitialState } from './state'
-import {
-  chapterOneClimaxScene,
-  chapterOneDuskScenes,
-  chapterOneMorningEvents,
-} from './chapters/chapterOneScenes'
+import { getChapter, getNextChapter } from './chapters'
 import { BROTHER_IDS } from './types'
 import type {
   BrotherId,
@@ -32,23 +28,6 @@ import type {
   GameResult,
   GameState,
 } from './types'
-
-export const CHAPTER_ONE_DAYS = 7
-
-export const CHAPTER_ONE_HEADINGS: Readonly<Record<number, string>> = {
-  1: 'Nothing stands but the sill-stones.',
-  2: 'The village is stirring. Smoke on the street.',
-  3: 'Cold nights now. Strangers on the road.',
-  4: 'The wolves are hungry.',
-  5: 'First flurries.',
-  6: 'Hard frost on the puddles. Every chimney smokes but the empty ones.',
-  7: 'The frost comes tonight.',
-}
-
-export const CHAPTER_ONE_MORNING_EVENTS = chapterOneMorningEvents
-export const CHAPTER_ONE_EVENING_BEATS: Readonly<Record<number, string>> = {
-  ...chapterOneDuskScenes,
-}
 
 const BROTHER_NAMES: Record<BrotherId, string> = {
   andreas: 'Andreas',
@@ -110,7 +89,60 @@ export function startChapterOne(
   sections: SectionRegistry,
 ): GameState {
   const initial = createInitialState()
-  return enterSection({ ...initial, sec: null }, '1.00', sections)
+  return enterSection({ ...initial, sec: null }, getChapter(1).intro, sections)
+}
+
+/**
+ * Moves a finished chapter on to the next one: a new day count, full
+ * Stamina and Grit, the new chapter's places open, and its opening scene.
+ * What the household owns, its relationships and its flags carry over.
+ */
+export function startNextChapter(
+  state: GameState,
+  sections: SectionRegistry,
+): GameState {
+  const chapter = getNextChapter(state.ch)
+  if (!chapter) throw new Error(`No chapter follows chapter ${state.ch}`)
+  const flags = { ...state.flags }
+  delete flags.scouted
+  delete flags.wolf_warning
+  const chars = { ...state.chars }
+  for (const brotherId of ORDER) {
+    const character = chars[brotherId]
+    chars[brotherId] = {
+      ...character,
+      stam: character.stamMax,
+      grit: 2,
+      kw: character.kw.filter((word) => word !== 'weary' && word !== 'wounded'),
+    }
+  }
+  return enterSection(
+    {
+      ...state,
+      ch: chapter.chapter,
+      day: 1,
+      done: {},
+      plans: {},
+      forced: {},
+      ri: 0,
+      pick: null,
+      pickLoc: null,
+      phase: null,
+      winter: null,
+      res: null,
+      chips: [],
+      evening: null,
+      flags,
+      chars,
+      lead: 'andreas',
+      unlocked: {
+        ...state.unlocked,
+        ...Object.fromEntries(chapter.unlocked.map((place) => [place, 1 as const])),
+      },
+    },
+    chapter.intro,
+    sections,
+  )
 }
 
 export function getVisibleChoices(
@@ -405,7 +437,7 @@ export function continueEvening(
   random: () => number = Math.random,
 ): GameState {
   if (state.mode !== 'evening') throw new Error('The day is not at evening')
-  const beat = CHAPTER_ONE_EVENING_BEATS[state.day]
+  const beat = getChapter(state.ch).eveningBeats[state.day]
   if (beat) return enterSection({ ...state, lead: 'andreas' }, beat, sections)
   return nextDay(state, sections, random)
 }
@@ -506,10 +538,11 @@ function nextDay(
   const day = state.day + 1
   const flags = { ...state.flags }
   delete flags.scouted
-  if (day > CHAPTER_ONE_DAYS) {
+  const chapter = getChapter(state.ch)
+  if (day > chapter.days) {
     return enterSection(
       { ...state, day, flags, lead: 'andreas' },
-      chapterOneClimaxScene,
+      chapter.climax,
       sections,
     )
   }
@@ -536,7 +569,7 @@ function nextDay(
   next = { ...next, forced: {} }
   const roll = dieRoll(random)
   if (roll > 1) {
-    const eventId = CHAPTER_ONE_MORNING_EVENTS[roll - 2]
+    const eventId = chapter.morningEvents[roll - 2]
     if (eventId && !next.done[`ev:${eventId}`]) {
       const event = sections[eventId]
       if (event && test(next, event.condition)) {

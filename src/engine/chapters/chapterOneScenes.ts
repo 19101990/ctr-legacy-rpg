@@ -1,11 +1,6 @@
 import type { EncounterRegistry, SectionRegistry } from '../content'
-import type { BrotherId, GameState } from '../types'
-
-const brotherNames: Record<BrotherId, string> = {
-  andreas: 'Andreas',
-  henning: 'Henning',
-  casper: 'Casper',
-}
+import type { GameState } from '../types'
+import { brotherNames, roadSummary } from './shared'
 
 const chapterOneList = (state: GameState): string => {
   const items = [
@@ -59,16 +54,6 @@ const chapterOneList = (state: GameState): string => {
     .map(({ title, done, status }) => `${done ? 'Done' : 'Open'}: ${title} (${status})`)
     .join('\n')
 }
-
-const roadSummary = (state: GameState): string =>
-  (['andreas', 'henning', 'casper'] as const)
-    .map((brother) => {
-      const completed = Object.keys(state.arcDone).filter((key) =>
-        key.startsWith(`${brother}:`),
-      ).length
-      return `**${brotherNames[brother]}**: ${completed} recorded steps.`
-    })
-    .join('\n\n')
 
 export const chapterOneScenes: SectionRegistry = {
   '1.00': {
@@ -862,18 +847,18 @@ export const chapterOneMorningEvents = [
 export const chapterOneEncounters: EncounterRegistry = [
   { id: 'deserter', chapter: 1, location: 'forest', scene: '1.e_deserter' },
   { id: 'pastor', chapter: 1, location: 'village', scene: '1.e_pastor' },
-  { id: 'kuhlmann', chapter: 1, location: 'kuhlmann', scene: '1.e_kuhlmann' },
-  { id: 'bode', chapter: 1, location: 'bode', scene: '1.e_bode' },
+  { id: 'kuhlmann', chapter: [1, 2, 3, 4], location: 'kuhlmann', scene: '1.e_kuhlmann' },
+  { id: 'bode', chapter: [1, 2, 3, 4], location: 'bode', scene: '1.e_bode' },
   {
     id: 'hart_thanks',
-    chapter: 1,
+    chapter: [1, 2],
     location: 'bode',
     scene: '1.ev_hart_thanks',
     condition: 'flag:helped_fire',
   },
   {
     id: 'hart_cold',
-    chapter: 1,
+    chapter: [1, 2],
     location: 'bode',
     scene: '1.ev_hart_cold',
     condition: 'flag:fire_ignored',
