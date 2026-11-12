@@ -44,7 +44,7 @@ interface RoadMilestone {
   reached(state: GameState): boolean
 }
 
-export const CHAPTER_ONE_ROAD_MILESTONES: Record<
+export const ROAD_MILESTONES: Record<
   BrotherId,
   readonly RoadMilestone[]
 > = {
@@ -54,6 +54,10 @@ export const CHAPTER_ONE_ROAD_MILESTONES: Record<
     {
       title: 'Stores for a winter (5 or more)',
       reached: (state) => state.hof.korn >= 5,
+    },
+    {
+      title: 'A working yard (House 2, or two improvements)',
+      reached: (state) => state.hof.heim >= 2 || state.hof.builds.length >= 2,
     },
   ],
   henning: [
@@ -80,7 +84,29 @@ export const CHAPTER_ONE_ROAD_MILESTONES: Record<
     {
       title: 'Someone owes you a favour',
       reached: (state) =>
-        Boolean(state.flags.favour_kuhlmann || state.flags.favour_bode),
+        state.hof.gunst >= 1 ||
+        Boolean(
+          state.flags.favour_kuhlmann ||
+            state.flags.favour_bode ||
+            state.flags.favour_pastor,
+        ),
+    },
+    {
+      title: 'You have heard of an estate that needs a man',
+      reached: (state) => Boolean(state.flags.siemens_rumor),
+    },
+    {
+      title: 'A foothold at the Siemens place',
+      reached: (state) => Boolean(state.flags.siemens_foothold),
+    },
+    {
+      title: 'A place of your own: buy in or marry into it',
+      reached: (state) =>
+        Boolean(
+          state.flags.siemens_buyin ||
+            state.flags.casper_betrothed ||
+            state.flags.siemens_courtship,
+        ),
     },
   ],
 }
@@ -832,7 +858,7 @@ function startEvening(state: GameState): GameState {
   }
   lines.push('Each brother who worked today gains 1 Experience.')
   for (const brotherId of ORDER) {
-    CHAPTER_ONE_ROAD_MILESTONES[brotherId].forEach((milestone, index) => {
+    ROAD_MILESTONES[brotherId].forEach((milestone, index) => {
       const key = `${brotherId}:${index}`
       if (next.arcDone[key] || !milestone.reached(next)) return
       const character = next.chars[brotherId]

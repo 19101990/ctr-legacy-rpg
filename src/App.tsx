@@ -12,7 +12,7 @@ import {
   acceptPendingCheck,
   beginPlannedDay,
   canPlanAction,
-  CHAPTER_ONE_ROAD_MILESTONES,
+  ROAD_MILESTONES,
   chooseStoryChoice,
   continueEvening,
   continueResult,
@@ -105,6 +105,12 @@ const LOCATIONS: Record<string, { name: string; description: string }> = {
   village: { name: 'The village', description: 'The church porch and the village street.' },
   kuhlmann: { name: 'The Kuhlmann yard', description: 'A neighbour with a barn, a horse and work.' },
   bode: { name: 'The Bode yard', description: 'Grain farmers who have returned home.' },
+  tower: { name: 'The church tower', description: 'The tower with its new cap and scaffold.' },
+  smith: { name: 'The forge', description: 'Master Carsten’s forge.' },
+  tavern: { name: 'Grape’s tavern', description: 'The only place with excise.' },
+  sheepfold: { name: 'Güldner’s fold', description: 'The great flock.' },
+  amtland: { name: 'The Amt land', description: 'Grey land where the plow is not used.' },
+  siemens: { name: 'The Siemens place', description: 'Beyond the Brink: an empty farm.' },
 }
 
 const LOCATION_ORDER = Object.keys(LOCATIONS)
@@ -1102,7 +1108,7 @@ function BrotherSheet({
 }) {
   const character = state.chars[brother]
   const detail = BROTHER_ARCS[brother]
-  const milestones = CHAPTER_ONE_ROAD_MILESTONES[brother]
+  const milestones = ROAD_MILESTONES[brother]
   return (
     <section className={`sheet-card ${BROTHER_COLORS[brother]}`}>
       <p className="section-label">{detail.arc} · character sheet</p>
@@ -1244,7 +1250,7 @@ function RulesTab() {
     <section className="rules-card">
       <p className="section-label">The household’s rules</p>
       <h2>How to play</h2>
-      <p>Each chapter lasts a set number of days (seven in Chapter 1, six in Chapter 2). Each day, choose one task for each brother; plans resolve in Andreas, Henning, Casper order.</p>
+      <p>Each chapter lasts a set number of days (seven in Chapter 1, six in Chapter 2, five in Chapter 3). Each day, choose one task for each brother; plans resolve in Andreas, Henning, Casper order.</p>
       <h3>Work and checks</h3>
       <ul>
         <li><strong>Ordinary work:</strong> the action’s description shows its costs and likely results. Physical effort may cost Stamina.</li>
@@ -1261,7 +1267,7 @@ function RulesTab() {
         <li>Spend XP on a brother’s sheet: an attribute increase costs its current score +2; maximum Stamina costs 5 XP; Grit costs 4 XP.</li>
       </ul>
       <h3>Chapter goals</h3>
-      <p>Heinrich’s list names what the household has to carry through the chapter. In Chapter 1 that is the roof, the pen, Stores, land, the spring, a neighbour’s favour and Standing. In Chapter 2 it is Stores to the thaw, the cow, and how you answer the people who knock. The last day of a chapter closes the list and lets you move on.</p>
+      <p>Heinrich’s list names what the household has to carry through the chapter. In Chapter 1 that is the roof, the pen, Stores, land, the spring, a neighbour’s favour and Standing. In Chapter 2 it is Stores to the thaw, the cow, and how you answer the people who knock. In Chapter 3 it is the roof and land that make Heinrich a farmer on the tower list, an honest count, and peace between the brothers. The last day of a chapter closes the list and lets you move on.</p>
     </section>
   )
 }

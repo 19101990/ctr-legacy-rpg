@@ -119,3 +119,65 @@ export function chapterTwoGoals(state: GameState): Goal[] {
     },
   ]
 }
+
+export const CHAPTER_THREE_DAYS = 5
+
+export function chapterThreeGoals(state: GameState): Goal[] {
+  const kin = state.chars
+  const learnedTrade = (['andreas', 'henning', 'casper'] as const).some((brother) =>
+    kin[brother].kw.includes('apprentice'),
+  )
+  return [
+    {
+      kind: 'must',
+      title: 'Heinrich counted among the farmers (3 Morgen and a roof)',
+      done: state.hof.land >= 3 && state.hof.heim >= 1,
+      status: `${state.hof.land} Morgen, House ${state.hof.heim}`,
+      stake:
+        'Otherwise the church vouches for him on credit: Standing minus 1 and a debt to the church.',
+    },
+    {
+      kind: 'should',
+      title: 'An honest count for the pastor’s list',
+      done: Boolean(state.flags.honest_count),
+      status: state.flags.honest_count
+        ? 'done'
+        : state.flags.embellished
+          ? 'rounded up'
+          : 'open',
+      stake: 'Honest households are easy to write. Rounded numbers get noticed.',
+    },
+    {
+      kind: 'should',
+      title: 'Peace at the family table (the Sunday council)',
+      done: Boolean(state.flags.brothers_peace),
+      status: state.flags.brothers_peace
+        ? 'peace'
+        : state.flags.brothers_rift
+          ? 'rift'
+          : 'Day 3',
+      stake: 'A silence between brothers carries into later chapters.',
+    },
+    {
+      kind: 'nice',
+      title: 'Learn the building trade from Uncle Andreas',
+      done: learnedTrade,
+      status: '',
+      stake: 'A keyword that helps every building task.',
+    },
+    {
+      kind: 'nice',
+      title: 'Casper hears of an estate that needs a man',
+      done: Boolean(state.flags.siemens_rumor),
+      status: '',
+      stake: 'The first step of Casper’s road.',
+    },
+    {
+      kind: 'nice',
+      title: 'Henning hears that the old herder’s hands are failing',
+      done: Boolean(state.flags.herder_rumor),
+      status: '',
+      stake: 'The first step of Henning’s road.',
+    },
+  ]
+}

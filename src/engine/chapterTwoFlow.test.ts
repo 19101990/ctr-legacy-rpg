@@ -71,7 +71,8 @@ describe('chapter registry', () => {
 
   it('only leads on to chapters that exist', () => {
     expect(getNextChapter(1)?.chapter).toBe(2)
-    expect(getNextChapter(2)).toBeNull()
+    expect(getNextChapter(2)?.chapter).toBe(3)
+    expect(getNextChapter(3)).toBeNull()
   })
 
   it('sends every scene choice somewhere that exists', () => {
@@ -121,10 +122,6 @@ describe('starting chapter two', () => {
     expect(autumnIds).not.toContain('ice_fish')
   })
 
-  it('refuses to continue past the last written chapter', () => {
-    const winter = startNextChapter(finishedChapterOne(), scenes)
-    expect(() => startNextChapter({ ...winter, mode: 'complete' }, scenes)).toThrow()
-  })
 })
 
 describe('chapter two day flow', () => {

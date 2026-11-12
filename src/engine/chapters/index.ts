@@ -13,6 +13,13 @@ import {
   chapterOneMorningEvents,
   chapterOneScenes,
 } from './chapterOneScenes'
+import { chapterThreeActions } from './chapterThreeActions'
+import {
+  chapterThreeClimaxScene,
+  chapterThreeDuskScenes,
+  chapterThreeMorningEvents,
+  chapterThreeScenes,
+} from './chapterThreeScenes'
 import { chapterTwoActions } from './chapterTwoActions'
 import {
   chapterTwoClimaxScene,
@@ -21,8 +28,10 @@ import {
   chapterTwoScenes,
 } from './chapterTwoScenes'
 import {
+  CHAPTER_THREE_DAYS,
   CHAPTER_TWO_DAYS,
   chapterOneGoals,
+  chapterThreeGoals,
   chapterTwoGoals,
   type Goal,
 } from './goals'
@@ -100,7 +109,42 @@ export const CHAPTERS: Readonly<Record<number, ChapterDefinition>> = {
     goalsLabel: 'Six days to the thaw',
     ending: {
       title: 'The ice has broken',
-      text: 'The family has come through the hungry months. The years that follow are beyond what can be played so far.',
+      text: 'The family has come through the hungry months. Six winters pass before the next page of the story.',
+    },
+  },
+  3: {
+    chapter: 3,
+    title: 'The Copper Knob',
+    year: '1654',
+    days: CHAPTER_THREE_DAYS,
+    intro: '2.00',
+    climax: chapterThreeClimaxScene,
+    unlocked: [
+      ...CHAPTER_ONE_UNLOCKS,
+      'village',
+      'kuhlmann',
+      'bode',
+      'tower',
+      'smith',
+      'tavern',
+      'sheepfold',
+      'amtland',
+      'siemens',
+    ],
+    headings: {
+      1: 'The tower cap is nearly ready.',
+      2: 'A tinker is on the road.',
+      3: 'Sunday. The family council.',
+      4: 'Clouds over the rye.',
+      5: 'The raising is tomorrow.',
+    },
+    eveningBeats: chapterThreeDuskScenes,
+    morningEvents: chapterThreeMorningEvents,
+    goals: chapterThreeGoals,
+    goalsLabel: 'Five days to the raising',
+    ending: {
+      title: 'The knob is raised',
+      text: 'The list is sealed in the tower and the village is written down. The next page of the story is ten winters on.',
     },
   },
 }
@@ -118,11 +162,13 @@ export function getNextChapter(chapter: number): ChapterDefinition | null {
 export const scenes: SectionRegistry = {
   ...chapterOneScenes,
   ...chapterTwoScenes,
+  ...chapterThreeScenes,
 }
 
 export const actions: ActionRegistry = [
   ...chapterOneActions,
   ...chapterTwoActions,
+  ...chapterThreeActions,
 ]
 
 export const encounters: EncounterRegistry = chapterOneEncounters
