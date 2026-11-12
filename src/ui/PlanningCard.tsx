@@ -1,6 +1,6 @@
 import { resolveCost } from '../engine/content'
 import type { ActionContent } from '../engine/content'
-import { canPlanAction } from '../engine/chapterOneFlow'
+import { canPlanAction } from '../engine/flow'
 import { actions as allActions, getChapter } from '../engine/chapters'
 import { gmin } from '../engine/rules'
 import { BROTHER_IDS } from '../engine/types'

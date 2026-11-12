@@ -1,5 +1,5 @@
 import type { Cost, SectionContent } from '../engine/content'
-import { currentCheckDefinition } from '../engine/chapterOneFlow'
+import { currentCheckDefinition } from '../engine/flow'
 import { actions as allActions } from '../engine/chapters'
 import { rivalBonus, tgt } from '../engine/rules'
 import type { GameState } from '../engine/types'

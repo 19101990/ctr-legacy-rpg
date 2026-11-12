@@ -15,7 +15,7 @@ import {
   setPlan,
   startNextChapter,
   checkPool,
-} from './engine/chapterOneFlow'
+} from './engine/flow'
 import { BROTHER_IDS } from './engine/types'
 import type { BrotherId } from './engine/types'
 import {

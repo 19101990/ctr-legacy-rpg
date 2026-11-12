@@ -11,7 +11,7 @@ import {
   rollPendingCheck,
   startChapterOne,
   startNextChapter,
-} from './chapterOneFlow'
+} from './flow'
 import {
   CHAPTERS,
   actions,

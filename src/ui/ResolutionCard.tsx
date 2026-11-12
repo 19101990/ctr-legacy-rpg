@@ -1,4 +1,4 @@
-import { currentCheckDefinition, interpolateBrotherName, checkPool } from '../engine/chapterOneFlow'
+import { currentCheckDefinition, interpolateBrotherName, checkPool } from '../engine/flow'
 import { actions as allActions, scenes as allScenes } from '../engine/chapters'
 import { tgt } from '../engine/rules'
 import type { GameState } from '../engine/types'
