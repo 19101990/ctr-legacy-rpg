@@ -72,7 +72,8 @@ describe('chapter registry', () => {
   it('only leads on to chapters that exist', () => {
     expect(getNextChapter(1)?.chapter).toBe(2)
     expect(getNextChapter(2)?.chapter).toBe(3)
-    expect(getNextChapter(3)).toBeNull()
+    expect(getNextChapter(3)?.chapter).toBe(4)
+    expect(getNextChapter(4)).toBeNull()
   })
 
   it('sends every scene choice somewhere that exists', () => {

@@ -111,6 +111,7 @@ const LOCATIONS: Record<string, { name: string; description: string }> = {
   sheepfold: { name: 'Güldner’s fold', description: 'The great flock.' },
   amtland: { name: 'The Amt land', description: 'Grey land where the plow is not used.' },
   siemens: { name: 'The Siemens place', description: 'Beyond the Brink: an empty farm.' },
+  chapel: { name: 'The chapel', description: 'Where the poorest shelter.' },
 }
 
 const LOCATION_ORDER = Object.keys(LOCATIONS)
@@ -1250,7 +1251,7 @@ function RulesTab() {
     <section className="rules-card">
       <p className="section-label">The household’s rules</p>
       <h2>How to play</h2>
-      <p>Each chapter lasts a set number of days (seven in Chapter 1, six in Chapter 2, five in Chapter 3). Each day, choose one task for each brother; plans resolve in Andreas, Henning, Casper order.</p>
+      <p>Each chapter lasts a set number of days (seven in Chapter 1, six in Chapter 2, five each in Chapters 3 and 4). Each day, choose one task for each brother; plans resolve in Andreas, Henning, Casper order.</p>
       <h3>Work and checks</h3>
       <ul>
         <li><strong>Ordinary work:</strong> the action’s description shows its costs and likely results. Physical effort may cost Stamina.</li>
@@ -1267,7 +1268,7 @@ function RulesTab() {
         <li>Spend XP on a brother’s sheet: an attribute increase costs its current score +2; maximum Stamina costs 5 XP; Grit costs 4 XP.</li>
       </ul>
       <h3>Chapter goals</h3>
-      <p>Heinrich’s list names what the household has to carry through the chapter. In Chapter 1 that is the roof, the pen, Stores, land, the spring, a neighbour’s favour and Standing. In Chapter 2 it is Stores to the thaw, the cow, and how you answer the people who knock. In Chapter 3 it is the roof and land that make Heinrich a farmer on the tower list, an honest count, and peace between the brothers. The last day of a chapter closes the list and lets you move on.</p>
+      <p>Heinrich’s list names what the household has to carry through the chapter. In Chapter 1 that is the roof, the pen, Stores, land, the spring, a neighbour’s favour and Standing. In Chapter 2 it is Stores to the thaw, the cow, and how you answer the people who knock. In Chapter 3 it is the roof and land that make Heinrich a farmer on the tower list, an honest count, and peace between the brothers. In Chapter 4 it is what the clerk will write beside the name, the herd before the council, and the brothers at one table. The last day of a chapter closes the list and lets you move on.</p>
     </section>
   )
 }

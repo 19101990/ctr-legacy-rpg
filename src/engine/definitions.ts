@@ -69,4 +69,5 @@ export const NPC_NAMES: Record<string, string> = {
   bode: 'Hanß Bode',
   meta: 'Meta and her children',
   koehler: 'Hans Köhler',
+  heijer: 'Hans Heijer',
 }

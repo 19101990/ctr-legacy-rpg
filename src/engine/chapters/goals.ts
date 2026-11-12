@@ -181,3 +181,55 @@ export function chapterThreeGoals(state: GameState): Goal[] {
     },
   ]
 }
+
+export const CHAPTER_FOUR_DAYS = 5
+
+export function chapterFourGoals(state: GameState): Goal[] {
+  const knowsTheFox = (['andreas', 'henning', 'casper'] as const).some((brother) =>
+    state.chars[brother].kw.includes('foxsecret'),
+  )
+  return [
+    {
+      kind: 'must',
+      title: 'Decide what the clerk will see (an honest count, or a hidden herd)',
+      done: Boolean(state.flags.honest_ledger || state.flags.hid_animals),
+      status: '',
+      stake:
+        'The count is the count. A hidden cow can be found; an honest number cannot be called a lie.',
+    },
+    {
+      kind: 'must',
+      title: 'The word beside your name: get the pastor to vouch, or prove the plot',
+      done: Boolean(state.flags.pastor_vouches || state.flags.plot_proof),
+      status: state.flags.plot_proof
+        ? 'plot on record'
+        : state.flags.pastor_vouches
+          ? 'pastor vouches'
+          : 'open',
+      stake:
+        'Otherwise the clerk writes Einlieger (lodger) instead of Köthner (cottager), and the boundary is forgotten.',
+    },
+    {
+      kind: 'should',
+      title: 'Henning before the council: the herd’s future',
+      done: Boolean(state.flags.herder_promised || state.flags.herder_postponed),
+      status: `Trust ${state.trust}`,
+      stake:
+        'The council decides whose hand takes the horn. Henning’s road depends on it.',
+    },
+    {
+      kind: 'should',
+      title: 'The brothers at one table',
+      done: Boolean(state.flags.clan_whole),
+      status: state.flags.brothers_rift ? 'a rift still' : '',
+      stake: 'The family stands together, or it stands in three places.',
+    },
+    {
+      kind: 'nice',
+      title: 'Learn the Fox’s secret',
+      done: knowsTheFox,
+      status: '',
+      stake: 'The old boundary stone, and a friend.',
+    },
+  ]
+}
