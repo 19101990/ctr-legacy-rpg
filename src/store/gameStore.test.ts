@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { StateStorage } from 'zustand/middleware'
-import { startChapterOne } from '../engine/chapterOneFlow'
+import { startChapterOne } from '../engine/flow'
 import { scenes } from '../engine/chapters'
 import { SAVE_VERSION } from '../engine/save'
 import { createGameStore, SAVE_KEY } from './gameStore'

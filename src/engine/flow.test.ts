@@ -10,7 +10,7 @@ import {
   continueEvening,
   continueResult,
   startChapterOne,
-} from './chapterOneFlow'
+} from './flow'
 import { createInitialState } from './state'
 
 const sections: SectionRegistry = {

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
-import { startChapterOne } from '../engine/chapterOneFlow'
+import { startChapterOne } from '../engine/flow'
 import { scenes } from '../engine/chapters'
 import { isSavedGame, SAVE_VERSION } from '../engine/save'
 import type { GameState } from '../engine/types'

@@ -7,7 +7,7 @@ import {
   setPlan,
   startChapterOne,
   startNextChapter,
-} from './chapterOneFlow'
+} from './flow'
 import { actions, encounters, scenes } from './chapters'
 import { isSavedGame } from './save'
 import type { GameState } from './types'

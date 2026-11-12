@@ -10,7 +10,7 @@ import {
   rollPendingCheck,
   startChapterOne,
   startNextChapter,
-} from './chapterOneFlow'
+} from './flow'
 import {
   actions,
   encounters,

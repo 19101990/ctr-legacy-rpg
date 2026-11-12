@@ -1,5 +1,5 @@
 import { ITEMS, KEYWORDS } from '../engine/definitions'
-import { ROAD_MILESTONES } from '../engine/chapterOneFlow'
+import { ROAD_MILESTONES } from '../engine/flow'
 import type { Attribute, BrotherId, GameState } from '../engine/types'
 import {
   BROTHER_NAMES,
