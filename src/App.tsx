@@ -38,6 +38,7 @@ import { HofSidebar, HofTab } from './ui/HofPanels'
 import { BrotherSheet } from './ui/BrotherSheet'
 import { RulesTab } from './ui/RulesTab'
 import { HouseholdList } from './ui/Household'
+import { UpdatePrompt } from './ui/UpdatePrompt'
 
 function App() {
   const game = useGameStore((store) => store.game)
@@ -248,6 +249,7 @@ function App() {
         <HofSidebar state={game} showBrothers={activeTab === 'hof'} />
       </aside>
       </div>
+      <UpdatePrompt />
     </main>
   )
 }

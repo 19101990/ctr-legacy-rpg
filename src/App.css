@@ -1288,3 +1288,34 @@ ul.cell-list > li.complete {
     display: none;
   }
 }
+
+/* ---- update and offline notice ---- */
+.update-toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  max-width: 28rem;
+  margin-left: auto;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 0.7rem 0.9rem;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
+}
+
+.update-toast p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.update-actions {
+  display: flex;
+  gap: 0.5rem;
+}
