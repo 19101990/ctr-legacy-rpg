@@ -13,12 +13,11 @@ import {
   rerollPendingCheck,
   rollPendingCheck,
   setPlan,
-  startChapterOne,
   startNextChapter,
   checkPool,
 } from './engine/chapterOneFlow'
 import { BROTHER_IDS } from './engine/types'
-import type { BrotherId, GameState } from './engine/types'
+import type { BrotherId } from './engine/types'
 import {
   actions as allActions,
   encounters as allEncounters,
@@ -26,6 +25,7 @@ import {
   scenes as allScenes,
 } from './engine/chapters'
 import { spendExperience, type Purchase } from './engine/growth'
+import { useGameStore } from './store/gameStore'
 import { BROTHER_NAMES, BROTHER_COLORS } from './ui/constants'
 import type { AppTab } from './ui/constants'
 import { StoryCard } from './ui/StoryCard'
@@ -40,9 +40,9 @@ import { RulesTab } from './ui/RulesTab'
 import { HouseholdList } from './ui/Household'
 
 function App() {
-  const [game, setGame] = useState<GameState>(() =>
-    startChapterOne(allScenes),
-  )
+  const game = useGameStore((store) => store.game)
+  const setGame = useGameStore((store) => store.setGame)
+  const restart = useGameStore((store) => store.restart)
   const [selectedBrother, setSelectedBrother] =
     useState<BrotherId>('andreas')
   const [activeTab, setActiveTab] = useState<AppTab>('story')
@@ -104,6 +104,12 @@ function App() {
     setGame(continueEvening(game, allScenes))
   }
 
+  function newGame() {
+    if (window.confirm('Start a new game? Your saved progress will be lost.')) {
+      restart()
+    }
+  }
+
   function spendExperienceFor(brother: BrotherId, purchase: Purchase) {
     setGame((current) => spendExperience(current, brother, purchase))
   }
@@ -115,6 +121,12 @@ function App() {
         <p className="tagline">
           Three brothers, one farm. Chapter {game.ch} · Day {Math.min(game.day, chapter.days)} of {chapter.days} · {chapter.year}
         </p>
+        <div className="save-note">
+          <span>Saved in this browser as you play.</span>
+          <button className="btn small" onClick={newGame} type="button">
+            New game
+          </button>
+        </div>
       </header>
 
       <BrotherStatusStrip state={game} onSelect={(brother) => setActiveTab(brother)} />
@@ -213,7 +225,7 @@ function App() {
             <CompletionCard
               state={game}
               onNextChapter={() => setGame(startNextChapter(game, allScenes))}
-              onRestart={() => setGame(startChapterOne(allScenes))}
+              onRestart={restart}
             />
           ) : null}
 
