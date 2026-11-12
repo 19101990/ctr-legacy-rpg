@@ -59,6 +59,15 @@ export const ROAD_MILESTONES: Record<
       title: 'A working yard (House 2, or two improvements)',
       reached: (state) => state.hof.heim >= 2 || state.hof.builds.length >= 2,
     },
+    {
+      title: 'The plot on record in the ledger',
+      reached: (state) =>
+        Boolean(
+          state.flags.plot_proof ||
+            state.flags.pastor_vouches ||
+            (state.ch >= 4 && state.hof.land >= 6),
+        ),
+    },
   ],
   henning: [
     {
@@ -72,6 +81,15 @@ export const ROAD_MILESTONES: Record<
     {
       title: 'Trust 4: the village knows your name',
       reached: (state) => state.trust >= 4,
+    },
+    {
+      title: 'The council speaks of the herd',
+      reached: (state) =>
+        Boolean(state.flags.herder_promised || state.flags.herder_postponed),
+    },
+    {
+      title: 'The horn is promised to you',
+      reached: (state) => Boolean(state.flags.herder_promised),
     },
   ],
   casper: [

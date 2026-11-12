@@ -114,10 +114,8 @@ describe('starting chapter three', () => {
     expect(winterIds).not.toContain('scaffold')
   })
 
-  it('refuses to continue past the last written chapter', () => {
-    const knob = startNextChapter(finishedChapterTwo(), scenes)
-    expect(getNextChapter(3)).toBeNull()
-    expect(() => startNextChapter({ ...knob, mode: 'complete' }, scenes)).toThrow()
+  it('leads on to chapter four', () => {
+    expect(getNextChapter(3)?.chapter).toBe(4)
   })
 })
 

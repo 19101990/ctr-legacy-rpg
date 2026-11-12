@@ -13,6 +13,13 @@ import {
   chapterOneMorningEvents,
   chapterOneScenes,
 } from './chapterOneScenes'
+import { chapterFourActions } from './chapterFourActions'
+import {
+  chapterFourClimaxScene,
+  chapterFourDuskScenes,
+  chapterFourMorningEvents,
+  chapterFourScenes,
+} from './chapterFourScenes'
 import { chapterThreeActions } from './chapterThreeActions'
 import {
   chapterThreeClimaxScene,
@@ -28,8 +35,10 @@ import {
   chapterTwoScenes,
 } from './chapterTwoScenes'
 import {
+  CHAPTER_FOUR_DAYS,
   CHAPTER_THREE_DAYS,
   CHAPTER_TWO_DAYS,
+  chapterFourGoals,
   chapterOneGoals,
   chapterThreeGoals,
   chapterTwoGoals,
@@ -147,6 +156,41 @@ export const CHAPTERS: Readonly<Record<number, ChapterDefinition>> = {
       text: 'The list is sealed in the tower and the village is written down. The next page of the story is ten winters on.',
     },
   },
+  4: {
+    chapter: 4,
+    title: 'The Bailiff’s Ledger',
+    year: 'February 1664',
+    days: CHAPTER_FOUR_DAYS,
+    intro: '4.00',
+    climax: chapterFourClimaxScene,
+    unlocked: [
+      ...CHAPTER_ONE_UNLOCKS,
+      'village',
+      'kuhlmann',
+      'bode',
+      'smith',
+      'chapel',
+      'tavern',
+      'sheepfold',
+      'amtland',
+      'siemens',
+    ],
+    headings: {
+      1: 'It has snowed since Candlemas.',
+      2: 'The herd is out in the deep snow.',
+      3: 'The council meets this week.',
+      4: 'A night of snow and a birth.',
+      5: 'The Amtsvogt is at the edge of the village.',
+    },
+    eveningBeats: chapterFourDuskScenes,
+    morningEvents: chapterFourMorningEvents,
+    goals: chapterFourGoals,
+    goalsLabel: 'Five days to the count',
+    ending: {
+      title: 'The family is in the ledger',
+      text: 'The Amtsvogt’s clerk has written the household down, and the Feldmanns step out of silence into ink. That is as far as the records go. What comes between their lines is yours to decide.',
+    },
+  },
 }
 
 export function getChapter(chapter: number): ChapterDefinition {
@@ -163,12 +207,14 @@ export const scenes: SectionRegistry = {
   ...chapterOneScenes,
   ...chapterTwoScenes,
   ...chapterThreeScenes,
+  ...chapterFourScenes,
 }
 
 export const actions: ActionRegistry = [
   ...chapterOneActions,
   ...chapterTwoActions,
   ...chapterThreeActions,
+  ...chapterFourActions,
 ]
 
 export const encounters: EncounterRegistry = chapterOneEncounters
