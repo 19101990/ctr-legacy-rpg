@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { MouseEvent } from 'react'
 import './App.css'
 import { resolveContentText } from './engine/content'
 import {
@@ -26,7 +27,7 @@ import {
 } from './engine/chapters'
 import { spendExperience, type Purchase } from './engine/growth'
 import { useGameStore } from './store/gameStore'
-import { BROTHER_NAMES, BROTHER_COLORS } from './ui/constants'
+import { BROTHER_NAMES, PANEL_ID, tabId } from './ui/constants'
 import type { AppTab } from './ui/constants'
 import { StoryCard } from './ui/StoryCard'
 import { PlanningCard } from './ui/PlanningCard'
@@ -39,6 +40,7 @@ import { BrotherSheet } from './ui/BrotherSheet'
 import { RulesTab } from './ui/RulesTab'
 import { HouseholdList } from './ui/Household'
 import { UpdatePrompt } from './ui/UpdatePrompt'
+import { AppTabs } from './ui/AppTabs'
 
 function App() {
   const game = useGameStore((store) => store.game)
@@ -47,6 +49,32 @@ function App() {
   const [selectedBrother, setSelectedBrother] =
     useState<BrotherId>('andreas')
   const [activeTab, setActiveTab] = useState<AppTab>('story')
+
+  const mainRef = useRef<HTMLDivElement>(null)
+  const lastView = useRef<string | null>(null)
+  // Where the player is: a change of this key means new content has replaced the old.
+  const view = [activeTab, game.mode, game.sec, game.day].join('|')
+
+  // When the content changes under the player (a new scene, a new phase of the
+  // day, another tab) the focused button is gone. Move focus to the new
+  // heading so keyboard and screen-reader users start reading from the top.
+  // A tab being operated with the arrow keys keeps its own focus.
+  useEffect(() => {
+    const previous = lastView.current
+    lastView.current = view
+    if (previous === null || previous === view) return
+    if (document.activeElement?.getAttribute('role') === 'tab') return
+    const heading = mainRef.current?.querySelector<HTMLElement>('h2')
+    if (heading) {
+      heading.tabIndex = -1
+      heading.focus({ preventScroll: false })
+    }
+  }, [view])
+
+  function focusMain(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+    mainRef.current?.focus()
+  }
 
   const chapter = getChapter(game.ch)
   const section = game.sec ? allScenes[game.sec] : undefined
@@ -117,6 +145,9 @@ function App() {
 
   return (
     <main className="game-shell">
+      <a className="skip-link" href={`#${PANEL_ID}`} onClick={focusMain}>
+        Skip to the game
+      </a>
       <header className="mast">
         <h1>Coming Home</h1>
         <p className="tagline">
@@ -131,28 +162,26 @@ function App() {
       </header>
 
       <BrotherStatusStrip state={game} onSelect={(brother) => setActiveTab(brother)} />
-      <nav className="app-tabs" role="tablist" aria-label="Game sections">
-        {([
+      <AppTabs
+        tabs={[
           ['story', 'Story'],
           ['hof', 'The Hof'],
           ...BROTHER_IDS.map((brother) => [brother, BROTHER_NAMES[brother]] as const),
           ['rules', 'Rules'],
-        ] as const).map(([tab, label]) => (
-          <button
-            aria-selected={activeTab === tab}
-            className={`app-tab${activeTab === tab ? ' active' : ''}${tab === 'rules' ? ' app-tab-end' : ''}${tab in BROTHER_COLORS ? ` ${BROTHER_COLORS[tab as BrotherId]}` : ''}`}
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            role="tab"
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+        ]}
+        active={activeTab}
+        onSelect={setActiveTab}
+      />
 
       <div className="game-layout">
-      <div className="game-main">
+      <div
+        aria-labelledby={tabId(activeTab)}
+        className="game-main"
+        id={PANEL_ID}
+        ref={mainRef}
+        role="tabpanel"
+        tabIndex={-1}
+      >
         {activeTab === 'story' ? (
           <>
           {game.mode === 'scene' && section ? (

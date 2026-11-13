@@ -76,7 +76,7 @@ export function ResolutionCard({
           {rolled ? (
             <div className="rolled">
               <div className="dice-row">
-                <span className="die best" aria-label={`Rolled ${rolled.a}`}>{rolled.a}</span>
+                <span className="die best" role="img" aria-label={`Rolled ${rolled.a}`}>{rolled.a}</span>
                 <span className="rv">+ {rolled.eff} = <b>{rolled.total}</b></span>
               </div>
               <p className={`result ${rolled.ok ? 'ok' : 'bad'}`}>

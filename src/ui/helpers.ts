@@ -53,3 +53,27 @@ export function gameStateForChoice(
 export function actionName(actionId: string): string {
   return allActions.find((action) => action.id === actionId)?.name ?? actionId
 }
+
+/**
+ * Which tab an arrow/Home/End key moves to, wrapping at the ends; null for
+ * any other key. Left/Right are the ARIA tab-list keys; Up/Down are accepted
+ * too because the tabs wrap onto several rows on a narrow screen.
+ */
+export function nextTab<T>(order: readonly T[], current: T, key: string): T | null {
+  const index = order.indexOf(current)
+  if (index === -1 || order.length === 0) return null
+  switch (key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      return order[(index + 1) % order.length]
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      return order[(index - 1 + order.length) % order.length]
+    case 'Home':
+      return order[0]
+    case 'End':
+      return order[order.length - 1]
+    default:
+      return null
+  }
+}
