@@ -54,6 +54,10 @@ export const BROTHER_COLORS: Record<BrotherId, string> = {
 
 export type AppTab = 'story' | 'hof' | 'rules' | BrotherId
 
+/** Ids that tie each tab to the panel it controls. */
+export const tabId = (tab: AppTab) => `tab-${tab}`
+export const PANEL_ID = 'main-content'
+
 export const LOCATIONS: Record<string, { name: string; description: string }> = {
   home: { name: 'Home', description: 'The hearth and the family’s shelter.' },
   plot: { name: 'The old plot', description: 'The burned house and its sill-stones.' },

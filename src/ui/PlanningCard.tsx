@@ -57,7 +57,7 @@ export function PlanningCard({
       </p>
 
       <h3 className="sub">Today’s plans</h3>
-      <div className="brother-tabs" aria-label="Choose a brother">
+      <div className="brother-tabs" role="group" aria-label="Choose a brother">
         {BROTHER_IDS.map((brother) => (
           <button
             aria-pressed={selectedBrother === brother}
